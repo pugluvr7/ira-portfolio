@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IRA Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1 id="account-name">IRA Portfolio</h1>
+      <p class="muted" id="account-meta"></p>
+    </div>
+    <button id="theme-toggle" class="ghost" type="button" aria-label="Toggle dark mode">Dark mode</button>
+  </header>
+
+  <main>
+    <section class="tiles" aria-label="Summary">
+      <div class="tile">
+        <span class="tile-label">Total value</span>
+        <span class="tile-value hero" id="total-value"></span>
+        <span class="tile-sub" id="day-change"></span>
+      </div>
+      <div class="tile">
+        <span class="tile-label">Total gain</span>
+        <span class="tile-value" id="total-gain"></span>
+        <span class="tile-sub muted" id="cost-basis"></span>
+      </div>
+      <div class="tile">
+        <span class="tile-label" id="contrib-label">Contributions</span>
+        <span class="tile-value" id="contrib-value"></span>
+        <div class="progress" role="progressbar" id="contrib-bar" aria-valuemin="0">
+          <div class="progress-fill" id="contrib-fill"></div>
+        </div>
+        <span class="tile-sub muted" id="contrib-remaining"></span>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="perf-title">
+      <div class="card-head">
+        <h2 id="perf-title">Account value</h2>
+        <div class="segmented" role="group" aria-label="Time range" id="range-buttons">
+          <button type="button" data-range="12">1Y</button>
+          <button type="button" data-range="36">3Y</button>
+          <button type="button" data-range="0" class="active">All</button>
+        </div>
+      </div>
+      <div class="legend" id="perf-legend"></div>
+      <div class="chart-wrap" id="perf-chart"></div>
+    </section>
+
+    <div class="grid-2">
+      <section class="card" aria-labelledby="alloc-title">
+        <div class="card-head"><h2 id="alloc-title">Allocation</h2></div>
+        <div class="alloc">
+          <div id="alloc-chart"></div>
+          <table class="alloc-table" id="alloc-table">
+            <thead><tr><th>Asset class</th><th class="num">Actual</th><th class="num">Target</th><th class="num">Drift</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="holdings-title">
+        <div class="card-head"><h2 id="holdings-title">Holdings</h2></div>
+        <div class="table-scroll">
+          <table class="holdings" id="holdings-table">
+            <thead>
+              <tr>
+                <th data-sort="symbol">Symbol</th>
+                <th data-sort="value" class="num">Value</th>
+                <th data-sort="weight" class="num">Weight</th>
+                <th data-sort="gain" class="num">Gain</th>
+                <th data-sort="dayChangePct" class="num">Day</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+
+  <footer class="muted">Sample data — edit <code>data.js</code> to use your own. Not financial advice.</footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
