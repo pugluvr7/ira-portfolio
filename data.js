@@ -14,25 +14,30 @@ window.PORTFOLIO = {
     limit: 7500, // IRS limit for under-50 in 2026; add catch-up if 50+
     contributedYTD: 5000,
     // Total of all contributions ever made (used for "contributed" line)
-    lifetime: 44000,
+    lifetime: 32000,
   },
 
-  // Target allocation by asset class (percent, should sum to 100)
+  // Target allocation by asset class (percent, should sum to 100).
+  // Order sets chart colors: plum, teal, gold, blue, rose.
   targets: {
-    "US Stocks": 55,
-    "International Stocks": 20,
-    "Bonds": 15,
-    "Real Estate": 5,
-    "Cash": 5,
+    "Stocks": 35,
+    "Seafood": 20,
+    "Precious Metals": 20,
+    "Real Estate": 15,
+    "Cash": 10,
   },
 
   // Holdings. costBasis is the total amount paid for the position.
   holdings: [
-    { symbol: "VTI",   name: "Vanguard Total Stock Market ETF",     assetClass: "US Stocks",            shares: 92.4,  price: 318.42, costBasis: 21250, dayChangePct: 0.62 },
-    { symbol: "SCHD",  name: "Schwab US Dividend Equity ETF",       assetClass: "US Stocks",            shares: 140,   price: 29.85,  costBasis: 3820,  dayChangePct: 0.21 },
-    { symbol: "VXUS",  name: "Vanguard Total International Stock",  assetClass: "International Stocks", shares: 168.2, price: 71.10,  costBasis: 10100, dayChangePct: -0.34 },
-    { symbol: "BND",   name: "Vanguard Total Bond Market ETF",      assetClass: "Bonds",                shares: 104,   price: 74.62,  costBasis: 7900,  dayChangePct: 0.08 },
-    { symbol: "VNQ",   name: "Vanguard Real Estate ETF",            assetClass: "Real Estate",          shares: 28.5,  price: 93.40,  costBasis: 2500,  dayChangePct: -0.71 },
-    { symbol: "SPAXX", name: "Fidelity Government Money Market",    assetClass: "Cash",                 shares: 2210,  price: 1.00,   costBasis: 2210,  dayChangePct: 0 },
+    { symbol: "VTI",   name: "Vanguard Total Stock Market ETF",       assetClass: "Stocks",          shares: 40,    price: 318.42, costBasis: 10500, dayChangePct: 0.62 },
+    { symbol: "BROTH", name: "Chicken Stock, 32 oz cartons",          assetClass: "Stocks",          shares: 600,   price: 3.49,   costBasis: 1800,  dayChangePct: 1.85 },
+    { symbol: "LOBS",  name: "Live Maine Lobsters (in the bathtub)",  assetClass: "Seafood",         shares: 85,    price: 42.00,  costBasis: 3900,  dayChangePct: -2.40 },
+    { symbol: "SHRMP", name: "Costco Frozen Shrimp Rings",            assetClass: "Seafood",         shares: 140,   price: 24.99,  costBasis: 3200,  dayChangePct: 0.35 },
+    { symbol: "GOLD",  name: "1 oz Gold Bars (sock drawer)",          assetClass: "Precious Metals", shares: 2,     price: 4012.50, costBasis: 5200, dayChangePct: 0.91 },
+    { symbol: "PNNY",  name: "Pre-1982 Copper Pennies (pickle jar)",  assetClass: "Precious Metals", shares: 40000, price: 0.03,   costBasis: 400,   dayChangePct: 0 },
+    { symbol: "SHED",  name: "Backyard Shed, slightly haunted",       assetClass: "Real Estate",     shares: 1,     price: 6500,   costBasis: 4200,  dayChangePct: 0 },
+    { symbol: "LAIRD", name: "1 sq ft of Scotland (comes with title)", assetClass: "Real Estate",    shares: 4,     price: 37.50,  costBasis: 199,   dayChangePct: -0.12 },
+    { symbol: "MTRS",  name: "Cash Under the Mattress",               assetClass: "Cash",            shares: 4100,  price: 1.00,   costBasis: 4100,  dayChangePct: 0 },
+    { symbol: "COAT",  name: "Found in Last Winter's Coat Pocket",    assetClass: "Cash",            shares: 37.25, price: 1.00,   costBasis: 37.25, dayChangePct: 0 },
   ],
 };
