@@ -1,6 +1,6 @@
 (function () {
   const P = window.PORTFOLIO;
-  const SERIES = ["--s1", "--s2", "--s3", "--s4", "--s5"]; // fixed order, never cycled
+  const { showTip, hideTip, classes, colorOf } = window.UI;
   const $ = (id) => document.getElementById(id);
   const NS = "http://www.w3.org/2000/svg";
 
@@ -20,14 +20,9 @@
   const dayChange = holdings.reduce((s, h) => s + (h.value * h.dayChangePct) / (100 + h.dayChangePct), 0);
   holdings.forEach((h) => (h.weight = (h.value / total) * 100));
 
-  const classes = Object.keys(P.targets);
-  const colorOf = (cls) => `var(${SERIES[classes.indexOf(cls)] || "--muted"})`;
 
   // ---------- header + tiles ----------
   function renderSummary() {
-    const a = P.account;
-    $("account-name").textContent = a.name;
-    $("account-meta").textContent = `${a.owner} · ${a.custodian} · as of ${new Date(a.asOf + "T00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
 
     $("total-value").textContent = usd.format(total);
     const dc = $("day-change");
@@ -223,20 +218,6 @@
     })
   );
 
-  const toggle = $("theme-toggle");
-  const isDark = () => document.documentElement.dataset.theme
-    ? document.documentElement.dataset.theme === "dark"
-    : matchMedia("(prefers-color-scheme: dark)").matches;
-  const syncToggle = () => (toggle.textContent = isDark() ? "☀ Light" : "☾ Dark");
-  document.documentElement.dataset.theme = localStorage.getItem("theme") || (isDark() ? "dark" : "light");
-  toggle.addEventListener("click", () => {
-    const next = isDark() ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    localStorage.setItem("theme", next);
-    syncToggle();
-  });
-  syncToggle();
-
   // ---------- helpers ----------
   function el(tag, attrs, text) {
     const n = document.createElementNS(NS, tag);
@@ -253,15 +234,6 @@
     const pt = (rad, a) => `${(cx + rad * Math.cos(a)).toFixed(2)},${(cy + rad * Math.sin(a)).toFixed(2)}`;
     return `M${pt(R, a0)}A${R},${R} 0 ${large} 1 ${pt(R, a1)}L${pt(r, a1)}A${r},${r} 0 ${large} 0 ${pt(r, a0)}Z`;
   }
-  const tip = $("tooltip");
-  function showTip(e, title, rows) {
-    tip.innerHTML = `<div class="tt-title">${title}</div>` + rows.map(([k, v]) => `<div class="tt-row"><span class="muted">${k}</span><span>${v}</span></div>`).join("");
-    tip.hidden = false;
-    const w = tip.offsetWidth;
-    tip.style.left = `${Math.min(e.clientX + 14, innerWidth - w - 8)}px`;
-    tip.style.top = `${e.clientY + 14}px`;
-  }
-  function hideTip() { tip.hidden = true; }
 
   renderSummary();
   renderPerf();

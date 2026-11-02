@@ -24,7 +24,8 @@ today's real total; swap in real monthly balances later if you have them.
 
 ## Files
 
-- `index.html` – page layout
+- `index.html` + `app.js` – dashboard: summary, value chart, allocation, holdings
+- `assets.html` + `assets.js` – asset visualization: picture tiles and a gallery card per holding
+- `common.js` – shared theme toggle, nav, tooltip and asset-class colors
 - `styles.css` – styling and light/dark theme tokens
-- `app.js` – calculations, SVG charts, table sorting, tooltips
-- `data.js` – your portfolio data
+- `data.js` – your portfolio data (each holding's `picture` emoji, or `image` for a real photo)

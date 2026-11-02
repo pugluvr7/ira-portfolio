@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Asset visualization · IRA Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="brand-name" id="account-name">IRA Portfolio</div>
+          <div class="brand-meta" id="account-meta"></div>
+        </div>
+      </div>
+      <div class="tabs" role="navigation" aria-label="Pages">
+        <a href="index.html">Dashboard</a>
+        <a href="assets.html">Asset visualization</a>
+      </div>
+      <button id="theme-toggle" class="pill-btn" type="button" aria-label="Toggle dark mode"></button>
+    </div>
+  </nav>
+
+  <main>
+    <header class="holder">
+      <span class="eyebrow">Asset visualization</span>
+      <h1 class="holder-name">The Vault</h1>
+      <p class="page-sub" id="page-sub"></p>
+    </header>
+
+    <section class="class-strip" id="class-strip" aria-label="Asset classes"></section>
+
+    <section class="card" aria-labelledby="vault-title">
+      <div class="card-head">
+        <div>
+          <h2 id="vault-title">Every dollar, in physical form</h2>
+          <p class="muted small" id="vault-scale"></p>
+        </div>
+      </div>
+      <div class="vault" id="vault"></div>
+    </section>
+
+    <div id="gallery"></div>
+  </main>
+
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+
+  <footer>Sample data — edit <code>data.js</code> to use your own. Not financial advice. Definitely not seafood advice.</footer>
+
+  <script src="data.js"></script>
+  <script src="common.js"></script>
+  <script src="assets.js"></script>
+</body>
+</html>
