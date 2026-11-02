@@ -7,46 +7,56 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1 id="account-name">IRA Portfolio</h1>
-      <p class="muted" id="account-meta"></p>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="brand-name" id="account-name">IRA Portfolio</div>
+          <div class="brand-meta" id="account-meta"></div>
+        </div>
+      </div>
+      <button id="theme-toggle" class="pill-btn" type="button" aria-label="Toggle dark mode"></button>
     </div>
-    <button id="theme-toggle" class="ghost" type="button" aria-label="Toggle dark mode">Dark mode</button>
-  </header>
+  </nav>
 
   <main>
-    <section class="tiles" aria-label="Summary">
-      <div class="tile">
-        <span class="tile-label">Total value</span>
-        <span class="tile-value hero" id="total-value"></span>
-        <span class="tile-sub" id="day-change"></span>
+    <section class="top">
+      <div class="hero">
+        <span class="eyebrow">Total balance</span>
+        <div class="hero-value" id="total-value"></div>
+        <div class="hero-row">
+          <span class="chip" id="day-change"></span>
+          <span class="hero-stat"><span class="hero-stat-label">Total gain</span><span id="total-gain"></span></span>
+          <span class="hero-stat"><span class="hero-stat-label">Cost basis</span><span id="cost-basis"></span></span>
+        </div>
       </div>
-      <div class="tile">
-        <span class="tile-label">Total gain</span>
-        <span class="tile-value" id="total-gain"></span>
-        <span class="tile-sub muted" id="cost-basis"></span>
-      </div>
-      <div class="tile">
-        <span class="tile-label" id="contrib-label">Contributions</span>
-        <span class="tile-value" id="contrib-value"></span>
+
+      <div class="card contrib">
+        <div class="card-head">
+          <h2 id="contrib-label">Contributions</h2>
+          <span class="badge" id="contrib-pct"></span>
+        </div>
+        <div class="contrib-value" id="contrib-value"></div>
         <div class="progress" role="progressbar" id="contrib-bar" aria-valuemin="0">
           <div class="progress-fill" id="contrib-fill"></div>
         </div>
-        <span class="tile-sub muted" id="contrib-remaining"></span>
+        <span class="muted small" id="contrib-remaining"></span>
       </div>
     </section>
 
     <section class="card" aria-labelledby="perf-title">
       <div class="card-head">
-        <h2 id="perf-title">Account value</h2>
+        <div>
+          <h2 id="perf-title">Account value</h2>
+          <div class="legend" id="perf-legend"></div>
+        </div>
         <div class="segmented" role="group" aria-label="Time range" id="range-buttons">
           <button type="button" data-range="12">1Y</button>
           <button type="button" data-range="36">3Y</button>
           <button type="button" data-range="0" class="active">All</button>
         </div>
       </div>
-      <div class="legend" id="perf-legend"></div>
       <div class="chart-wrap" id="perf-chart"></div>
     </section>
 
@@ -84,7 +94,7 @@
 
   <div class="tooltip" id="tooltip" role="status" hidden></div>
 
-  <footer class="muted">Sample data — edit <code>data.js</code> to use your own. Not financial advice.</footer>
+  <footer>Sample data — edit <code>data.js</code> to use your own. Not financial advice.</footer>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

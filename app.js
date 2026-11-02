@@ -32,18 +32,19 @@
     $("total-value").textContent = usd.format(total);
     const dc = $("day-change");
     dc.textContent = `${dayChange >= 0 ? "▲" : "▼"} ${signed(dayChange, usd.format)} (${signed((dayChange / (total - dayChange)) * 100, (n) => pct(n, 2))}) today`;
-    dc.className = "tile-sub " + (dayChange >= 0 ? "up" : "down");
+    dc.className = "chip " + (dayChange >= 0 ? "up" : "down");
 
     const gain = total - cost;
     const g = $("total-gain");
     g.textContent = `${signed(gain, usd0.format)} (${signed((gain / cost) * 100, pct)})`;
-    g.className = "tile-value " + (gain >= 0 ? "up" : "down");
-    $("cost-basis").textContent = `Cost basis ${usd0.format(cost)}`;
+    g.className = gain >= 0 ? "up" : "down";
+    $("cost-basis").textContent = usd0.format(cost);
 
     const c = P.contributions;
     const frac = Math.min(1, c.contributedYTD / c.limit);
     $("contrib-label").textContent = `${c.year} contributions`;
-    $("contrib-value").textContent = `${usd0.format(c.contributedYTD)} / ${usd0.format(c.limit)}`;
+    $("contrib-value").innerHTML = `${usd0.format(c.contributedYTD)} <span class="of">of ${usd0.format(c.limit)}</span>`;
+    $("contrib-pct").textContent = `${Math.round(frac * 100)}%`;
     $("contrib-fill").style.width = `${frac * 100}%`;
     const bar = $("contrib-bar");
     bar.setAttribute("aria-valuemax", c.limit);
@@ -108,7 +109,15 @@
     ticks.forEach(([d, label]) => svg.append(el("text", { x: x(d), y: H - 8, "text-anchor": "middle", class: "axis-label" }, label)));
 
     const path = (key) => data.map((d, i) => `${i ? "L" : "M"}${x(d.date).toFixed(1)},${y(d[key]).toFixed(1)}`).join("");
-    svg.append(el("path", { d: path("contributed"), fill: "none", stroke: "var(--contrib)", "stroke-width": 2, "stroke-dasharray": "4 3" }));
+    const defs = el("defs", {});
+    const grad = el("linearGradient", { id: "value-fill", x1: 0, y1: 0, x2: 0, y2: 1 });
+    grad.append(el("stop", { offset: "0%", "stop-color": "var(--s1)", "stop-opacity": 0.22 }));
+    grad.append(el("stop", { offset: "100%", "stop-color": "var(--s1)", "stop-opacity": 0 }));
+    defs.append(grad);
+    svg.append(defs);
+    const baseY = y(0).toFixed(1);
+    svg.append(el("path", { d: `${path("value")}L${x(data[data.length - 1].date).toFixed(1)},${baseY}L${x(data[0].date).toFixed(1)},${baseY}Z`, fill: "url(#value-fill)" }));
+    svg.append(el("path", { d: path("contributed"), fill: "none", stroke: "var(--s3)", "stroke-width": 2, "stroke-dasharray": "4 3" }));
     svg.append(el("path", { d: path("value"), fill: "none", stroke: "var(--s1)", "stroke-width": 2, "stroke-linejoin": "round" }));
 
     const last = data[data.length - 1];
@@ -169,7 +178,7 @@
       const drift = c.actual - c.target;
       return `<tr><td><i class="dot" style="background:${colorOf(c.cls)}"></i>${c.cls}</td>
         <td class="num">${pct(c.actual)}</td><td class="num">${pct(c.target, 0)}</td>
-        <td class="num ${Math.abs(drift) >= 2 ? (drift > 0 ? "up" : "down") : "muted"}">${signed(drift, pct)}</td></tr>`;
+        <td class="num ${Math.abs(drift) >= 2 ? "drift-flag" : "muted"}">${signed(drift, pct)}</td></tr>`;
     }).join("");
   }
 
@@ -183,8 +192,10 @@
     });
     $("holdings-table").querySelector("tbody").innerHTML = rows.map((h) => `
       <tr>
-        <td><span class="sym"><i class="dot" style="background:${colorOf(h.assetClass)}"></i>${h.symbol}</span>
-            <span class="sym-name">${h.name}</span></td>
+        <td><div class="sym-cell">
+          <span class="sym-badge" style="--c:${colorOf(h.assetClass)}" title="${h.assetClass}">${h.symbol.slice(0, 4)}</span>
+          <div><span class="sym">${h.symbol}</span><span class="sym-name">${h.name}</span></div>
+        </div></td>
         <td class="num">${usd.format(h.value)}<span class="sym-name">${h.shares} × ${usd.format(h.price)}</span></td>
         <td class="num">${pct(h.weight)}</td>
         <td class="num ${h.gain >= 0 ? "up" : "down"}">${signed(h.gain, usd0.format)}<span class="sym-name">${signed(h.gainPct, pct)}</span></td>
@@ -216,9 +227,8 @@
   const isDark = () => document.documentElement.dataset.theme
     ? document.documentElement.dataset.theme === "dark"
     : matchMedia("(prefers-color-scheme: dark)").matches;
-  const syncToggle = () => (toggle.textContent = isDark() ? "Light mode" : "Dark mode");
-  const saved = localStorage.getItem("theme");
-  if (saved) document.documentElement.dataset.theme = saved;
+  const syncToggle = () => (toggle.textContent = isDark() ? "☀ Light" : "☾ Dark");
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || (isDark() ? "dark" : "light");
   toggle.addEventListener("click", () => {
     const next = isDark() ? "light" : "dark";
     document.documentElement.dataset.theme = next;
