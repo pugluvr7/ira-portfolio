@@ -1,5 +1,5 @@
 (function () {
-  const { start, db, loadPortfolio, refreshTransferNotice, colorOf, esc } = window.UI;
+  const { start, db, loadPortfolio, refreshTransferNotice, openInvite, colorOf, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
 
   const usd0 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -87,7 +87,18 @@
         p_recipient_email: email, p_holding_id: h.id, p_quantity: q, p_message: f.message.value.trim(),
       });
       btn.disabled = false;
-      if (error) return say(msg, error.message, "error");
+      if (error) {
+        say(msg, error.message, "error");
+        if (/No account found/i.test(error.message)) {
+          const invite = document.createElement("button");
+          invite.type = "button";
+          invite.className = "link-btn";
+          invite.textContent = "Invite them →";
+          invite.addEventListener("click", () => openInvite({ from: P.holder, to: email }));
+          msg.append(" ", invite);
+        }
+        return;
+      }
       form.reset();
       await reload();
       say(msg, "Request sent ✓ They'll see it next time they open the site.");

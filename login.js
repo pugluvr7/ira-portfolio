@@ -33,6 +33,11 @@
     })
   );
 
+  // Invite links look like login.html?signup=1&email=friend@example.com
+  const params = new URLSearchParams(location.search);
+  if (params.get("signup")) document.querySelector('.auth-tabs button[data-mode="signup"]').click();
+  if (params.get("email")) $("email").value = params.get("email");
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = $("email").value.trim();

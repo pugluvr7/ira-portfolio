@@ -11,6 +11,8 @@ retirement holdings — stocks, seafood, precious metals, real estate and cash.
   from stocks to live lobsters.
 - **Transfers** — send part of any holding to another account by email. They get a badge and banner,
   and the assets only move when they accept. Senders can cancel while it's pending.
+- **Invite a friend** — the ✉️ Invite button in the nav opens a ready-made invite you can text, email,
+  copy or share; the link opens straight onto Create account.
 
 It's a static site (plain HTML/CSS/JS, no build step). Accounts and data live in
 [Supabase](https://supabase.com): Supabase Auth handles sign-up/login and Postgres stores

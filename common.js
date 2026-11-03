@@ -119,15 +119,93 @@
         </div>
         <div class="nav-user">
           <span class="user-chip" title="Signed in"><span class="user-avatar" aria-hidden="true">${esc((P.holder || "?").slice(0, 1).toUpperCase())}</span>${esc(P.holder)}</span>
+          <button id="invite-btn" class="pill-btn invite-pill" type="button">✉️ Invite</button>
           <button id="sign-out" class="pill-btn" type="button">Sign out</button>
           <button id="theme-toggle" class="pill-btn" type="button" aria-label="Toggle dark mode"></button>
         </div>
       </div>`;
+    $("invite-btn").addEventListener("click", () => openInvite({ from: P.holder }));
     $("sign-out").addEventListener("click", async () => {
       await db.auth.signOut();
       location.href = "login.html";
     });
     wireThemeToggle();
+  }
+
+  // ---------- invite a friend: text, email, copy or share ----------
+  // Uses the visitor's own Messages / email apps via sms: and mailto: links — no sending service needed.
+  let inviteFrom = "";
+  function inviteLink(email) {
+    const url = new URL("login.html", cfg.siteUrl || location.href);
+    url.searchParams.set("signup", "1");
+    if (email) url.searchParams.set("email", email);
+    return url.href;
+  }
+  function openInvite({ from, to = "" } = {}) {
+    if (from) inviteFrom = from;
+    let dlg = $("invite-dialog");
+    if (!dlg) {
+      document.body.insertAdjacentHTML("beforeend", `
+        <dialog class="invite-dialog" id="invite-dialog" aria-labelledby="invite-title">
+          <form method="dialog" class="invite-form">
+            <div class="invite-head">
+              <span class="invite-emoji" aria-hidden="true">🦞</span>
+              <div>
+                <h2 id="invite-title">Invite a friend</h2>
+                <p class="muted small">Send them a link to make their own account.</p>
+              </div>
+              <button class="icon-btn" value="close" aria-label="Close">✕</button>
+            </div>
+            <label class="field"><span>Their phone number or email (optional)</span>
+              <input id="invite-to" type="text" autocomplete="off" autofocus placeholder="555-123-4567 or friend@example.com" />
+            </label>
+            <label class="field"><span>Message</span>
+              <textarea id="invite-msg" rows="4" maxlength="500"></textarea>
+            </label>
+            <div class="invite-actions">
+              <a class="primary-btn" id="invite-sms" href="#">💬 Text it</a>
+              <a class="primary-btn" id="invite-email" href="#">✉️ Email it</a>
+              <button class="pill-btn" id="invite-copy" type="button">🔗 Copy link</button>
+              <button class="pill-btn" id="invite-share" type="button" hidden>Share…</button>
+            </div>
+            <p class="form-msg" id="invite-status" role="status"></p>
+          </form>
+        </dialog>`);
+      dlg = $("invite-dialog");
+      const sync = () => {
+        const to = $("invite-to").value.trim();
+        const isEmail = to.includes("@");
+        const body = $("invite-msg").value;
+        const phone = isEmail ? "" : to.replace(/[^\d+]/g, "");
+        // "?&body=" works for both iOS and Android Messages
+        $("invite-sms").href = `sms:${phone}?&body=${encodeURIComponent(body)}`;
+        $("invite-email").href = `mailto:${isEmail ? encodeURIComponent(to) : ""}?subject=${encodeURIComponent(`${inviteFrom || "A friend"} invited you to IRA Portfolio`)}&body=${encodeURIComponent(body)}`;
+      };
+      dlg.addEventListener("input", sync);
+      dlg.syncInvite = sync;
+      $("invite-copy").addEventListener("click", async () => {
+        const link = inviteLink($("invite-to").value.includes("@") ? $("invite-to").value.trim() : "");
+        try {
+          await navigator.clipboard.writeText(link);
+          $("invite-status").textContent = "Link copied ✓";
+        } catch {
+          $("invite-status").textContent = link;
+        }
+        $("invite-status").dataset.kind = "success";
+      });
+      if (navigator.share) {
+        $("invite-share").hidden = false;
+        $("invite-share").addEventListener("click", () =>
+          navigator.share({ title: "IRA Portfolio", text: $("invite-msg").value }).catch(() => {}));
+      }
+    }
+    $("invite-to").value = to;
+    $("invite-status").textContent = "";
+    $("invite-msg").value =
+      `${inviteFrom || "I"} invited you to IRA Portfolio — the retirement tracker for stocks, seafood, gold bars and haunted sheds. ` +
+      `Make your account here: ${inviteLink(to.includes("@") ? to : "")}`;
+    dlg.syncInvite();
+    dlg.showModal();
   }
 
   // ---------- transfer notifications: nav badge + banner ----------
@@ -182,5 +260,5 @@
     }
   }
 
-  window.UI = { db, configured, start, loadPortfolio, refreshTransferNotice, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
+  window.UI = { db, configured, start, loadPortfolio, refreshTransferNotice, openInvite, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
 })();
