@@ -1,18 +1,12 @@
 (function () {
   const { start, db, loadPortfolio, classes, colorOf, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
-  const SAMPLE = window.SAMPLE_PORTFOLIO;
 
   const say = (el, text, kind = "success") => {
     el.textContent = text;
     el.dataset.kind = kind;
     if (kind === "success") setTimeout(() => el.textContent === text && (el.textContent = ""), 2500);
   };
-  const toRow = (h) => ({
-    symbol: h.symbol, name: h.name, asset_class: h.assetClass,
-    shares: h.shares, price: h.price, cost_basis: h.costBasis, day_change_pct: h.dayChangePct,
-    picture: h.picture || "", unit: h.unit || "", note: h.note || "", image: h.image || "",
-  });
 
   start(async (P, { user }) => {
     let state = P;
@@ -98,7 +92,7 @@
     }
     function renderHoldings() {
       const n = state.holdings.length;
-      $("holdings-count").textContent = n ? `${n} holding${n === 1 ? "" : "s"}` : "No holdings yet — add one, or load the joke sample.";
+      $("holdings-count").textContent = n ? `${n} holding${n === 1 ? "" : "s"}` : "No holdings yet — add your first one.";
       list.innerHTML = state.holdings.map(holdingForm).join("");
     }
     renderHoldings();
@@ -151,24 +145,6 @@
       if (!confirm(`Delete ${symbol}? This can't be undone.`)) return;
       const { error } = await db.from("holdings").delete().eq("id", form.dataset.id);
       if (error) return say(form.querySelector(".form-msg"), error.message, "error");
-      await refresh();
-    });
-
-    $("load-sample").addEventListener("click", async () => {
-      const n = SAMPLE.holdings.length;
-      const extra = state.holdings.length ? ` They'll be added alongside your ${state.holdings.length} existing holdings.` : "";
-      if (!confirm(`Add the ${n} joke sample holdings (lobsters, gold "bars", the haunted shed…) to your portfolio?${extra}`)) return;
-      const btn = $("load-sample");
-      btn.disabled = true;
-      const { error } = await db.from("holdings").insert(SAMPLE.holdings.map(toRow));
-      if (!error && !state.contributions.lifetime) {
-        const c = SAMPLE.contributions;
-        await db.from("profiles").update({ contributed_ytd: c.contributedYTD, lifetime_contributions: c.lifetime }).eq("id", user.id);
-        pf.elements.contributed_ytd.value = c.contributedYTD;
-        pf.elements.lifetime_contributions.value = c.lifetime;
-      }
-      btn.disabled = false;
-      if (error) return alert(error.message);
       await refresh();
     });
   });

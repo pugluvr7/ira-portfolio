@@ -51,7 +51,7 @@
       $("contrib-remaining").textContent = left > 0 ? `${usd0.format(left)} left to contribute` : "Maxed out for the year ✓";
     }
 
-    // ---------- history (simulated from sample data) ----------
+    // ---------- history (simulated from contributions) ----------
     function buildHistory() {
       const end = new Date(P.account.asOf + "T00:00");
       const startYear = 2021;

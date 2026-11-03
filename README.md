@@ -8,7 +8,7 @@ retirement holdings — stocks, seafood, precious metals, real estate and cash.
 - **Dashboard** — balance, gains, contribution progress, value-over-time chart, allocation vs. target, holdings.
 - **Asset visualization** — every holding as pictures: a tile "vault" and a gallery card per asset.
 - **Edit portfolio** — change your account details and target allocation; add, edit and delete holdings,
-  or load the joke sample portfolio in one click.
+  from stocks to live lobsters.
 
 It's a static site (plain HTML/CSS/JS, no build step). Accounts and data live in
 [Supabase](https://supabase.com): Supabase Auth handles sign-up/login and Postgres stores
@@ -44,7 +44,6 @@ from disk won't work well with login — serve the folder.)
 - `login.html` + `login.js` – sign in / create account
 - `common.js` – Supabase client, auth guard, portfolio loading, nav, theme, tooltip, class colors
 - `config.js` – your Supabase project URL and publishable key
-- `sample-portfolio.js` – the joke sample holdings offered on the Edit page
 - `supabase/schema.sql` – tables, row-level security policies and the new-user trigger
 - `styles.css` – styling and light/dark theme tokens
 
