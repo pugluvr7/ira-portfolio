@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Friends · IRA Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="is-loading">
+  <nav class="nav" id="nav"></nav>
+
+  <main>
+    <header class="holder">
+      <span class="eyebrow">Friends</span>
+      <h1 class="holder-name">Your people</h1>
+      <p class="page-sub">Add friends to send them lobsters, gold bars and sheds without typing their email every time.</p>
+    </header>
+
+    <div class="transfer-grid">
+      <section class="card" aria-labelledby="add-title">
+        <div class="card-head"><h2 id="add-title">Add a friend</h2></div>
+        <form id="add-form" class="send-form" novalidate>
+          <label class="field"><span>Their account email</span>
+            <input name="email" type="email" autocomplete="off" placeholder="friend@example.com" required />
+          </label>
+          <div class="form-actions">
+            <span class="form-msg" id="add-msg" role="status"></span>
+            <button class="primary-btn" type="submit">Send friend request</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="requests-title">
+        <div class="card-head">
+          <h2 id="requests-title">Friend requests</h2>
+          <span class="badge" id="requests-count" hidden></span>
+        </div>
+        <div id="requests" class="transfer-list"></div>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="friends-title">
+      <div class="card-head">
+        <h2 id="friends-title">Your friends</h2>
+        <span class="muted small" id="friends-count"></span>
+      </div>
+      <div id="friends" class="friend-grid"></div>
+    </section>
+
+    <section class="card" aria-labelledby="sent-title">
+      <div class="card-head"><h2 id="sent-title">Sent requests</h2></div>
+      <div id="sent" class="transfer-list"></div>
+    </section>
+  </main>
+
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+
+  <footer>Not financial advice. Definitely not seafood advice.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="friends.js"></script>
+</body>
+</html>

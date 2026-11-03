@@ -9,7 +9,9 @@ retirement holdings — stocks, seafood, precious metals, real estate and cash.
 - **Asset visualization** — every holding as pictures: a tile "vault" and a gallery card per asset.
 - **Edit portfolio** — change your account details and target allocation; add, edit and delete holdings,
   from stocks to live lobsters.
-- **Transfers** — send part of any holding to another account by email. They get a badge and banner,
+- **Friends** — add other users by email; they accept or decline. Friends show up in a picker
+  when you send a transfer, so you don't have to type their email.
+- **Transfers** — send part of any holding to a friend or to any account by email. They get a badge and banner,
   and the assets only move when they accept. Senders can cancel while it's pending.
 - **Invite a friend** — the ✉️ Invite button emails a friend an invite straight from the site
   (10 per person per day), or copies/shares the link; it opens straight onto Create account.
@@ -23,7 +25,7 @@ each user's profile and holdings, protected by row-level security so people only
 1. **Create a Supabase project** at https://supabase.com/dashboard (the free tier is fine).
 2. **Create the tables:** in the project, open **SQL Editor → New query**, paste
    [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. Then do the same with
-   [`supabase/transfers.sql`](supabase/transfers.sql).
+   [`supabase/transfers.sql`](supabase/transfers.sql) and then [`supabase/friends.sql`](supabase/friends.sql).
 3. **Point auth at the site:** **Authentication → URL Configuration → Site URL** =
    `http://localhost:5173` (or wherever you host it).
    Optional: to let people sign in without confirming their email first, turn off
@@ -65,11 +67,13 @@ from disk won't work well with login — serve the folder.)
 - `assets.html` + `assets.js` – asset visualization
 - `edit.html` + `edit.js` – edit account, targets and holdings
 - `transfers.html` + `transfers.js` – send, accept, decline and cancel transfers
+- `friends.html` + `friends.js` – add, accept, decline and remove friends
 - `login.html` + `login.js` – sign in / create account
 - `common.js` – Supabase client, auth guard, portfolio loading, nav, theme, tooltip, class colors
 - `config.js` – your Supabase project URL and publishable key
 - `supabase/schema.sql` – tables, row-level security policies and the new-user trigger
 - `supabase/transfers.sql` – transfers table and the create/respond/cancel functions that move assets
+- `supabase/friends.sql` – friendships and their functions, plus transfer-to-friend
 - `supabase/invites.sql` – invite log and the limits check used by the invite function
 - `supabase/functions/send-invite/index.ts` – Edge Function that emails invites via Resend
 - `styles.css` – styling and light/dark theme tokens

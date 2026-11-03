@@ -20,8 +20,19 @@
       <section class="card" aria-labelledby="send-title">
         <div class="card-head"><h2 id="send-title">Send assets</h2></div>
         <form id="send-form" class="send-form" novalidate>
-          <label class="field"><span>Recipient's email</span>
-            <input name="email" type="email" autocomplete="off" placeholder="friend@example.com" required />
+          <div class="field">
+            <span>Send to</span>
+            <div class="segmented recipient-mode" role="tablist" aria-label="Choose recipient by">
+              <button type="button" role="tab" data-mode="friend" class="active" aria-selected="true">Friend</button>
+              <button type="button" role="tab" data-mode="email" aria-selected="false">Email</button>
+            </div>
+          </div>
+          <label class="field" id="friend-field"><span>Friend</span>
+            <select name="friend"></select>
+            <span class="muted small" id="friend-hint" hidden>No friends yet — <a href="friends.html">add some on the Friends page</a>, or send by email.</span>
+          </label>
+          <label class="field" id="email-field" hidden><span>Recipient's email</span>
+            <input name="email" type="email" autocomplete="off" placeholder="friend@example.com" />
           </label>
           <label class="field"><span>Holding</span><select name="holding" required></select></label>
           <label class="field"><span>Quantity</span>

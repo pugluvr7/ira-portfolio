@@ -508,3 +508,37 @@ a.brand { color: inherit; text-decoration: none; }
 .invite-alt .pill-btn { box-shadow: none; }
 .invite-form .form-msg { margin: 0; word-break: break-all; }
 .link-btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 650; color: var(--primary-ink); text-decoration: underline; }
+
+/* ---------- friends ---------- */
+.recipient-mode { align-self: flex-start; }
+.person-row {
+  display: grid; grid-template-columns: 44px 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--page);
+}
+.person-avatar {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 17px; color: #1f1724;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+.person-avatar.big { width: 64px; height: 64px; font-size: 26px; }
+.person-body { min-width: 0; }
+.person-name { font-weight: 650; font-size: 15px; }
+.person-body .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.friend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.friend-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+  padding: 20px 16px; border-radius: 18px; border: 1px solid var(--border); background: var(--page);
+}
+.friend-card .person-avatar { margin-bottom: 6px; }
+.friend-card .muted { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.friend-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+.friend-actions .primary-btn { padding: 7px 14px; font-size: 13px; }
+.friend-actions .ghost-btn { padding: 6px 12px; }
+
+/* nav has five tabs now: tighten so it fits next to the user controls */
+.tabs a { padding: 6px 11px; }
+@media (max-width: 1180px) { .user-chip { display: none; } }
+@media (max-width: 900px) {
+  .person-row { grid-template-columns: 44px 1fr; }
+  .person-row .transfer-actions { grid-column: 1 / -1; justify-content: flex-end; }
+}

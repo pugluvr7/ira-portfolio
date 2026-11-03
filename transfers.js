@@ -1,5 +1,5 @@
 (function () {
-  const { start, db, loadPortfolio, refreshTransferNotice, openInvite, colorOf, esc } = window.UI;
+  const { start, db, loadPortfolio, refreshNotices, openInvite, colorOf, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
 
   const usd0 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -13,12 +13,16 @@
   start(async (P, { user }) => {
     let holdings = P.holdings;
     let transfers = [];
+    let friends = [];
 
     async function load() {
-      const [portfolio, res] = await Promise.all([
+      const [portfolio, res, fr] = await Promise.all([
         loadPortfolio(user.id),
         db.from("transfers").select("*").order("created_at", { ascending: false }),
+        db.rpc("list_friends"),
       ]);
+      // Friends are optional: if friends.sql hasn't been run, sending by email still works.
+      friends = (fr.data || []).filter((f) => f.status === "accepted");
       if (res.error) {
         throw new Error(/transfers/.test(res.error.message)
           ? "Transfers aren't set up in the database yet — run supabase/transfers.sql in the Supabase SQL editor."
@@ -30,7 +34,7 @@
     async function reload() {
       await load();
       render();
-      refreshTransferNotice(user.id);
+      refreshNotices(user.id);
     }
 
     const pendingOut = (holdingId) => transfers
@@ -41,7 +45,31 @@
     // ---------- send form ----------
     const form = $("send-form");
     const f = form.elements;
-    const preselect = new URLSearchParams(location.search).get("holding");
+    const params = new URLSearchParams(location.search);
+    const preselect = params.get("holding");
+    const preselectFriend = params.get("to");
+    let mode = "friend";
+
+    function setMode(next) {
+      mode = next;
+      document.querySelectorAll(".recipient-mode button").forEach((b) => {
+        b.classList.toggle("active", b.dataset.mode === mode);
+        b.setAttribute("aria-selected", b.dataset.mode === mode);
+      });
+      $("friend-field").hidden = mode !== "friend";
+      $("email-field").hidden = mode !== "email";
+    }
+    document.querySelectorAll(".recipient-mode button").forEach((b) =>
+      b.addEventListener("click", () => setMode(b.dataset.mode)));
+
+    function renderFriendOptions() {
+      const current = f.friend.value || preselectFriend;
+      f.friend.innerHTML = friends.length
+        ? friends.map((fr) => `<option value="${esc(fr.friend_id)}"${fr.friend_id === current ? " selected" : ""}>${esc(fr.friend_name)} (${esc(fr.friend_email)})</option>`).join("")
+        : `<option value="" disabled selected>No friends yet</option>`;
+      f.friend.disabled = !friends.length;
+      $("friend-hint").hidden = !!friends.length;
+    }
 
     function renderSendOptions() {
       const current = f.holding.value || preselect;
@@ -73,9 +101,11 @@
       const msg = $("send-msg");
       const h = selected();
       const email = f.email.value.trim();
+      const friend = friends.find((fr) => fr.friend_id === f.friend.value);
       const q = +f.quantity.value;
-      if (!email) return say(msg, "Enter the recipient's email.", "error");
-      if (email.toLowerCase() === (user.email || "").toLowerCase()) return say(msg, "You can't send assets to yourself.", "error");
+      if (mode === "friend" && !friend) return say(msg, "Pick a friend, or switch to Email.", "error");
+      if (mode === "email" && !email) return say(msg, "Enter the recipient's email.", "error");
+      if (mode === "email" && email.toLowerCase() === (user.email || "").toLowerCase()) return say(msg, "You can't send assets to yourself.", "error");
       if (!h) return say(msg, "Pick a holding to send.", "error");
       if (!(q > 0)) return say(msg, "Quantity must be more than 0.", "error");
       if (q > available(h)) return say(msg, `You only have ${num.format(available(h))} ${h.unit || "units"} available.`, "error");
@@ -83,9 +113,10 @@
       const btn = form.querySelector("button[type=submit]");
       btn.disabled = true;
       say(msg, "Sending…", "info");
-      const { error } = await db.rpc("create_transfer", {
-        p_recipient_email: email, p_holding_id: h.id, p_quantity: q, p_message: f.message.value.trim(),
-      });
+      const common = { p_holding_id: h.id, p_quantity: q, p_message: f.message.value.trim() };
+      const { error } = mode === "friend"
+        ? await db.rpc("create_transfer_to_friend", { p_friend_id: friend.friend_id, ...common })
+        : await db.rpc("create_transfer", { p_recipient_email: email, ...common });
       btn.disabled = false;
       if (error) {
         say(msg, error.message, "error");
@@ -99,9 +130,11 @@
         }
         return;
       }
+      const keepFriend = f.friend.value;
       form.reset();
+      f.friend.value = keepFriend;
       await reload();
-      say(msg, "Request sent ✓ They'll see it next time they open the site.");
+      say(msg, `Request sent to ${mode === "friend" ? friend.friend_name : email} ✓ They'll see it next time they open the site.`);
     });
 
     // ---------- lists ----------
@@ -143,6 +176,7 @@
         ? history.map((t) => transferCard(t, `<span class="status-pill status-${t.status}">${STATUS[t.status]}</span>`)).join("")
         : empty("No completed transfers yet.");
       renderSendOptions();
+      renderFriendOptions();
     }
 
     document.querySelector("main").addEventListener("click", async (e) => {
@@ -163,5 +197,7 @@
 
     await load();
     render();
+    // Start on Email if there are no friends to pick from.
+    setMode(friends.length ? "friend" : "email");
   });
 })();

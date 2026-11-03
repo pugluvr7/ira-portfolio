@@ -99,7 +99,9 @@
     ["assets.html", "Asset visualization"],
     ["edit.html", "Edit portfolio"],
     ["transfers.html", "Transfers"],
+    ["friends.html", "Friends"],
   ];
+  const BADGES = { "transfers.html": "transfer-badge", "friends.html": "friend-badge" };
   function renderNav(P) {
     const nav = $("nav");
     if (!nav) return;
@@ -115,7 +117,7 @@
           </div>
         </a>
         <div class="tabs" role="navigation" aria-label="Pages">
-          ${PAGES.map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ""}>${label}${href === "transfers.html" ? '<span class="tab-badge" id="transfer-badge" hidden></span>' : ""}</a>`).join("")}
+          ${PAGES.map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ""}>${label}${BADGES[href] ? `<span class="tab-badge" id="${BADGES[href]}" hidden></span>` : ""}</a>`).join("")}
         </div>
         <div class="nav-user">
           <span class="user-chip" title="Signed in"><span class="user-avatar" aria-hidden="true">${esc((P.holder || "?").slice(0, 1).toUpperCase())}</span>${esc(P.holder)}</span>
@@ -220,28 +222,45 @@
     dlg.showModal();
   }
 
-  // ---------- transfer notifications: nav badge + banner ----------
-  async function refreshTransferNotice(userId) {
-    const { data, error } = await db.from("transfers")
-      .select("id, sender_name, quantity, unit, name, picture")
-      .eq("recipient_id", userId).eq("status", "pending")
-      .order("created_at", { ascending: false });
-    if (error) return console.warn("Couldn't check transfers:", error.message); // e.g. transfers.sql not run yet
-    const n = data.length;
-    const badge = $("transfer-badge");
-    if (badge) { badge.hidden = !n; badge.textContent = n; }
-    document.getElementById("transfer-banner")?.remove();
-    const onTransfersPage = (location.pathname.split("/").pop() || "") === "transfers.html";
-    if (!n || onTransfersPage) return;
-    const t = data[0];
-    const qty = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(t.quantity);
-    const more = n > 1 ? ` and ${n - 1} more request${n > 2 ? "s" : ""}` : "";
+  // ---------- notifications: nav badges + one banner (transfers first, then friend requests) ----------
+  async function refreshNotices(userId) {
+    const [tr, fr] = await Promise.all([
+      db.from("transfers")
+        .select("id, sender_name, quantity, unit, name, picture")
+        .eq("recipient_id", userId).eq("status", "pending")
+        .order("created_at", { ascending: false }),
+      db.rpc("list_friends"),
+    ]);
+    // Either may fail if its SQL file hasn't been run yet; the rest of the page still works.
+    if (tr.error) console.warn("Couldn't check transfers:", tr.error.message);
+    if (fr.error) console.warn("Couldn't check friend requests:", fr.error.message);
+    const transfers = tr.data || [];
+    const requests = (fr.data || []).filter((f) => f.status === "pending" && f.direction === "incoming");
+
+    const setBadge = (id, n) => { const b = $(id); if (b) { b.hidden = !n; b.textContent = n; } };
+    setBadge("transfer-badge", transfers.length);
+    setBadge("friend-badge", requests.length);
+
+    document.getElementById("notice-banner")?.remove();
+    const page = location.pathname.split("/").pop() || "";
+    let pic, text, href;
+    if (transfers.length && page !== "transfers.html") {
+      const t = transfers[0];
+      const qty = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(t.quantity);
+      const more = transfers.length > 1 ? ` and ${transfers.length - 1} more request${transfers.length > 2 ? "s" : ""}` : "";
+      [pic, href] = [t.picture || "🔔", "transfers.html"];
+      text = `<strong>${esc(t.sender_name)}</strong> wants to send you ${qty} ${esc(t.unit || "")} of ${esc(t.name || "something")}${more}.`;
+    } else if (requests.length && page !== "friends.html") {
+      const more = requests.length > 1 ? ` (and ${requests.length - 1} more)` : "";
+      [pic, href] = ["👋", "friends.html"];
+      text = `<strong>${esc(requests[0].friend_name)}</strong> wants to be your friend${more}.`;
+    } else return;
     $("nav").insertAdjacentHTML("afterend", `
-      <div class="notice-banner" id="transfer-banner" role="status">
+      <div class="notice-banner" id="notice-banner" role="status">
         <div class="notice-inner">
-          <span class="notice-pic" aria-hidden="true">${esc(t.picture || "🔔")}</span>
-          <span><strong>${esc(t.sender_name)}</strong> wants to send you ${qty} ${esc(t.unit || "")} of ${esc(t.name || "something")}${more}.</span>
-          <a class="primary-btn" href="transfers.html">Review</a>
+          <span class="notice-pic" aria-hidden="true">${esc(pic)}</span>
+          <span>${text}</span>
+          <a class="primary-btn" href="${href}">Review</a>
         </div>
       </div>`);
   }
@@ -257,7 +276,7 @@
     try {
       const P = await loadPortfolio(session.user.id);
       renderNav(P);
-      refreshTransferNotice(session.user.id);
+      refreshNotices(session.user.id);
       await render(P, { user: session.user });
     } catch (err) {
       console.error(err);
@@ -272,5 +291,5 @@
     }
   }
 
-  window.UI = { db, configured, start, loadPortfolio, refreshTransferNotice, openInvite, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
+  window.UI = { db, configured, start, loadPortfolio, refreshNotices, openInvite, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
 })();
