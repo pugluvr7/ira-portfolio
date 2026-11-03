@@ -17,8 +17,10 @@
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");
-const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") ||
+// Secrets pasted into the dashboard can pick up stray spaces, newlines or quotes; strip them.
+const cleanKey = (v?: string) => (v || "").trim().replace(/^["']|["']$/g, "").trim();
+const VAPID_PRIVATE_KEY = cleanKey(Deno.env.get("VAPID_PRIVATE_KEY"));
+const VAPID_PUBLIC_KEY = cleanKey(Deno.env.get("VAPID_PUBLIC_KEY")) ||
   "BNxhJVJSNb8-GVykoeGPv2WByKQAKMuJ16FbqKPkBtYBfPyhq6xWeDLVb82OPl0M8EMT1bgtdxmcAnAQHkZB1vw";
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "https://pugluvr7.github.io/ira-portfolio/";
 const SITE_URL = Deno.env.get("SITE_URL") || "https://pugluvr7.github.io/ira-portfolio/";
@@ -58,14 +60,22 @@ async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, length:
 let signingKey: CryptoKey | null = null;
 async function vapidHeader(endpoint: string): Promise<string> {
   if (!signingKey) {
-    const pub = unb64u(VAPID_PUBLIC_KEY);
-    signingKey = await crypto.subtle.importKey(
-      "jwk",
-      { kty: "EC", crv: "P-256", d: VAPID_PRIVATE_KEY, x: b64u(pub.slice(1, 33)), y: b64u(pub.slice(33, 65)), ext: true },
-      { name: "ECDSA", namedCurve: "P-256" },
-      false,
-      ["sign"],
-    );
+    let pub: Uint8Array, privLen = 0;
+    try { pub = unb64u(VAPID_PUBLIC_KEY); privLen = unb64u(VAPID_PRIVATE_KEY).length; } catch { pub = new Uint8Array(); }
+    if (pub.length !== 65 || privLen !== 32) {
+      throw new Error("the VAPID_PRIVATE_KEY secret looks malformed — it should be the single 43-character line from the key file.");
+    }
+    try {
+      signingKey = await crypto.subtle.importKey(
+        "jwk",
+        { kty: "EC", crv: "P-256", d: VAPID_PRIVATE_KEY, x: b64u(pub.slice(1, 33)), y: b64u(pub.slice(33, 65)), ext: true },
+        { name: "ECDSA", namedCurve: "P-256" },
+        false,
+        ["sign"],
+      );
+    } catch (err) {
+      throw new Error(`Couldn't load the VAPID key — does VAPID_PRIVATE_KEY match the public key in config.js? (${(err as Error).message})`);
+    }
   }
   const header = b64u(enc.encode(JSON.stringify({ typ: "JWT", alg: "ES256" })));
   const claims = b64u(enc.encode(JSON.stringify({
@@ -209,6 +219,7 @@ Deno.serve(async (req: Request) => {
     return reply(200, { sent });
   } catch (err) {
     console.error(err);
-    return reply(500, { error: "Couldn't send notifications. Has supabase/push.sql been run?" });
+    // Surface the real reason (no secrets are ever included in these messages).
+    return reply(500, { error: `Couldn't send notifications: ${(err as Error).message}` });
   }
 });

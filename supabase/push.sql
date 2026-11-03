@@ -1,5 +1,5 @@
--- Push notifications. Run once in Supabase (SQL Editor -> New query -> paste -> Run),
--- after friends.sql.
+-- Push notifications. Run in Supabase (SQL Editor -> New query -> paste -> Run), after
+-- friends.sql. Safe to re-run.
 --
 -- Each browser/device that turns on notifications stores a Web Push subscription here.
 -- The send-push Edge Function reads them with the service role to deliver alerts for new
@@ -65,3 +65,10 @@ grant execute on function public.delete_push_subscription(text) to authenticated
 -- Which requests have already been announced by push.
 alter table public.transfers add column if not exists pushed_at timestamptz;
 alter table public.friendships add column if not exists pushed_at timestamptz;
+
+-- The send-push Edge Function uses the service role to read subscriptions and stamp pushed_at.
+-- Newer Supabase projects don't always grant it new tables automatically, so grant explicitly.
+grant select, delete on public.push_subscriptions to service_role;
+grant select, update on public.transfers, public.friendships to service_role;
+grant select on public.profiles to service_role;
+grant select, update on public.invites to service_role;
