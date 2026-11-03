@@ -121,7 +121,10 @@
                 <div class="asset-weight" title="${pct(h.weight)} of portfolio">
                   <div class="asset-weight-fill" style="width:${Math.max(1, h.weight)}%"></div>
                 </div>
-                <span class="muted small">${pct(h.weight)} of portfolio</span>
+                <div class="asset-foot">
+                  <span class="muted small">${pct(h.weight)} of portfolio</span>
+                  <a class="asset-send" href="transfers.html?holding=${h.id}">Send →</a>
+                </div>
               </div>
             </article>`).join("")}
         </div>

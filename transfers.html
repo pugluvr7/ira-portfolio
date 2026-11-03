@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transfers · IRA Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="is-loading">
+  <nav class="nav" id="nav"></nav>
+
+  <main>
+    <header class="holder">
+      <span class="eyebrow">Transfers</span>
+      <h1 class="holder-name">Send &amp; receive</h1>
+      <p class="page-sub">Send part of any holding to another account. Nothing moves until they accept.</p>
+    </header>
+
+    <div class="transfer-grid">
+      <section class="card" aria-labelledby="send-title">
+        <div class="card-head"><h2 id="send-title">Send assets</h2></div>
+        <form id="send-form" class="send-form" novalidate>
+          <label class="field"><span>Recipient's email</span>
+            <input name="email" type="email" autocomplete="off" placeholder="friend@example.com" required />
+          </label>
+          <label class="field"><span>Holding</span><select name="holding" required></select></label>
+          <label class="field"><span>Quantity</span>
+            <input name="quantity" type="number" min="0" step="any" required />
+          </label>
+          <p class="send-preview muted small" id="send-preview"></p>
+          <label class="field"><span>Note (optional)</span>
+            <input name="message" type="text" maxlength="200" placeholder="Happy birthday, enjoy the lobsters" />
+          </label>
+          <div class="form-actions">
+            <span class="form-msg" id="send-msg" role="status"></span>
+            <button class="primary-btn" type="submit">Send request</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="incoming-title">
+        <div class="card-head">
+          <h2 id="incoming-title">Waiting for you</h2>
+          <span class="badge" id="incoming-count"></span>
+        </div>
+        <div id="incoming" class="transfer-list"></div>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="outgoing-title">
+      <div class="card-head"><h2 id="outgoing-title">Sent, waiting on them</h2></div>
+      <div id="outgoing" class="transfer-list"></div>
+    </section>
+
+    <section class="card" aria-labelledby="history-title">
+      <div class="card-head"><h2 id="history-title">History</h2></div>
+      <div id="history" class="transfer-list"></div>
+    </section>
+  </main>
+
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+
+  <footer>Not financial advice. Definitely not seafood advice.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="transfers.js"></script>
+</body>
+</html>

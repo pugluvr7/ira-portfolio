@@ -431,3 +431,51 @@ a.brand { color: inherit; text-decoration: none; }
   .user-chip { display: none; }
   .nav-inner { flex-wrap: wrap; }
 }
+
+/* ---------- transfers ---------- */
+.tabs a { position: relative; }
+.tab-badge {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px;
+  border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1;
+  background: var(--down); color: #fff; vertical-align: 1px;
+}
+.notice-banner { background: linear-gradient(90deg, var(--primary-soft), var(--secondary-soft)); border-bottom: 1px solid var(--border); }
+.notice-inner { max-width: 1160px; margin: 0 auto; padding: 10px 28px; display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.notice-inner .primary-btn { margin-left: auto; padding: 6px 14px; font-size: 13px; }
+.notice-pic { font-size: 22px; }
+
+.transfer-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; margin-bottom: 20px; }
+.transfer-grid .card { margin-bottom: 0; }
+.send-form { display: flex; flex-direction: column; gap: 14px; }
+.send-preview { margin: -6px 0 0; min-height: 1.2em; }
+.transfer-list { display: flex; flex-direction: column; gap: 10px; }
+.transfer-empty { margin: 4px 0; }
+.transfer-card {
+  display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center;
+  padding: 14px 16px; border-radius: 16px; border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--c) 6%, var(--surface));
+  box-shadow: inset 4px 0 0 var(--c);
+}
+.transfer-pic {
+  width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; font-size: 30px;
+  background: color-mix(in srgb, var(--c) 18%, transparent);
+}
+.transfer-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.transfer-who { font-size: 14px; }
+.transfer-what { font-size: 15px; font-weight: 600; }
+.transfer-note { margin: 2px 0; font-size: 13px; font-style: italic; color: var(--text-2); }
+.transfer-actions { display: flex; gap: 8px; align-items: center; }
+.status-pill { font-size: 12px; font-weight: 650; padding: 4px 10px; border-radius: 999px; background: var(--grid); color: var(--text-2); white-space: nowrap; }
+.status-accepted { background: color-mix(in srgb, var(--up) 14%, transparent); color: var(--up); }
+.status-declined, .status-failed { background: color-mix(in srgb, var(--down) 12%, transparent); color: var(--down); }
+
+.asset-foot { display: flex; justify-content: space-between; align-items: center; }
+.asset-send { font-size: 13px; font-weight: 650; color: var(--primary-ink); text-decoration: none; }
+.asset-send:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .transfer-grid { grid-template-columns: 1fr; }
+  .transfer-card { grid-template-columns: 44px 1fr; }
+  .transfer-actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .notice-inner { padding: 10px 16px; }
+}

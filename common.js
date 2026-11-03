@@ -98,6 +98,7 @@
     ["index.html", "Dashboard"],
     ["assets.html", "Asset visualization"],
     ["edit.html", "Edit portfolio"],
+    ["transfers.html", "Transfers"],
   ];
   function renderNav(P) {
     const nav = $("nav");
@@ -114,7 +115,7 @@
           </div>
         </a>
         <div class="tabs" role="navigation" aria-label="Pages">
-          ${PAGES.map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ""}>${label}</a>`).join("")}
+          ${PAGES.map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ""}>${label}${href === "transfers.html" ? '<span class="tab-badge" id="transfer-badge" hidden></span>' : ""}</a>`).join("")}
         </div>
         <div class="nav-user">
           <span class="user-chip" title="Signed in"><span class="user-avatar" aria-hidden="true">${esc((P.holder || "?").slice(0, 1).toUpperCase())}</span>${esc(P.holder)}</span>
@@ -129,6 +130,32 @@
     wireThemeToggle();
   }
 
+  // ---------- transfer notifications: nav badge + banner ----------
+  async function refreshTransferNotice(userId) {
+    const { data, error } = await db.from("transfers")
+      .select("id, sender_name, quantity, unit, name, picture")
+      .eq("recipient_id", userId).eq("status", "pending")
+      .order("created_at", { ascending: false });
+    if (error) return console.warn("Couldn't check transfers:", error.message); // e.g. transfers.sql not run yet
+    const n = data.length;
+    const badge = $("transfer-badge");
+    if (badge) { badge.hidden = !n; badge.textContent = n; }
+    document.getElementById("transfer-banner")?.remove();
+    const onTransfersPage = (location.pathname.split("/").pop() || "") === "transfers.html";
+    if (!n || onTransfersPage) return;
+    const t = data[0];
+    const qty = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(t.quantity);
+    const more = n > 1 ? ` and ${n - 1} more request${n > 2 ? "s" : ""}` : "";
+    $("nav").insertAdjacentHTML("afterend", `
+      <div class="notice-banner" id="transfer-banner" role="status">
+        <div class="notice-inner">
+          <span class="notice-pic" aria-hidden="true">${esc(t.picture || "🔔")}</span>
+          <span><strong>${esc(t.sender_name)}</strong> wants to send you ${qty} ${esc(t.unit || "")} of ${esc(t.name || "something")}${more}.</span>
+          <a class="primary-btn" href="transfers.html">Review</a>
+        </div>
+      </div>`);
+  }
+
   // ---------- page bootstrap for signed-in pages ----------
   async function start(render) {
     if (!configured) return showSetupNeeded();
@@ -140,6 +167,7 @@
     try {
       const P = await loadPortfolio(session.user.id);
       renderNav(P);
+      refreshTransferNotice(session.user.id);
       await render(P, { user: session.user });
     } catch (err) {
       console.error(err);
@@ -154,5 +182,5 @@
     }
   }
 
-  window.UI = { db, configured, start, loadPortfolio, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
+  window.UI = { db, configured, start, loadPortfolio, refreshTransferNotice, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
 })();
