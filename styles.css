@@ -502,7 +502,9 @@ a.brand { color: inherit; text-decoration: none; }
   border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px; width: 100%; resize: vertical;
 }
 .field textarea:focus { outline: none; border-color: var(--primary-ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 45%, transparent); }
-.invite-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.invite-actions .pill-btn { box-shadow: none; }
+.invite-send { padding: 11px; }
+.invite-alt { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--grid); }
+.invite-alt .muted { margin-right: auto; }
+.invite-alt .pill-btn { box-shadow: none; }
 .invite-form .form-msg { margin: 0; word-break: break-all; }
 .link-btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 650; color: var(--primary-ink); text-decoration: underline; }

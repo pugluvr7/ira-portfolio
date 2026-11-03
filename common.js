@@ -132,8 +132,9 @@
     wireThemeToggle();
   }
 
-  // ---------- invite a friend: text, email, copy or share ----------
-  // Uses the visitor's own Messages / email apps via sms: and mailto: links — no sending service needed.
+  // ---------- invite a friend: site-sent email, plus copy link / share ----------
+  // "Send invite" calls the send-invite Edge Function (supabase/functions/send-invite),
+  // which emails the invite from the site. Copy link and Share work without it.
   let inviteFrom = "";
   function inviteLink(email) {
     const url = new URL("login.html", cfg.siteUrl || location.href);
@@ -141,70 +142,81 @@
     if (email) url.searchParams.set("email", email);
     return url.href;
   }
+  const shareText = () =>
+    `${inviteFrom || "I"} invited you to IRA Portfolio — the retirement tracker for stocks, seafood, gold bars and haunted sheds. ` +
+    `Make your account here: ${inviteLink("")}`;
+
+  async function sendInvite(email, note) {
+    const { error } = await db.functions.invoke("send-invite", { body: { email, note } });
+    if (!error) return null;
+    // Function errors carry the response; pull out our friendly message if there is one.
+    try { return (await error.context.json()).error || error.message; } catch { return error.message; }
+  }
+
   function openInvite({ from, to = "" } = {}) {
     if (from) inviteFrom = from;
     let dlg = $("invite-dialog");
     if (!dlg) {
       document.body.insertAdjacentHTML("beforeend", `
         <dialog class="invite-dialog" id="invite-dialog" aria-labelledby="invite-title">
-          <form method="dialog" class="invite-form">
+          <form class="invite-form" id="invite-form" novalidate>
             <div class="invite-head">
               <span class="invite-emoji" aria-hidden="true">🦞</span>
               <div>
                 <h2 id="invite-title">Invite a friend</h2>
-                <p class="muted small">Send them a link to make their own account.</p>
+                <p class="muted small">We'll email them a link to make their own account.</p>
               </div>
-              <button class="icon-btn" value="close" aria-label="Close">✕</button>
+              <button class="icon-btn" type="button" id="invite-close" aria-label="Close">✕</button>
             </div>
-            <label class="field"><span>Their phone number or email (optional)</span>
-              <input id="invite-to" type="text" autocomplete="off" autofocus placeholder="555-123-4567 or friend@example.com" />
+            <label class="field"><span>Their email</span>
+              <input id="invite-to" type="email" autocomplete="off" placeholder="friend@example.com" autofocus required />
             </label>
-            <label class="field"><span>Message</span>
-              <textarea id="invite-msg" rows="4" maxlength="500"></textarea>
+            <label class="field"><span>Add a note (optional)</span>
+              <textarea id="invite-note" rows="3" maxlength="300" placeholder="Come look at my lobsters"></textarea>
             </label>
-            <div class="invite-actions">
-              <a class="primary-btn" id="invite-sms" href="#">💬 Text it</a>
-              <a class="primary-btn" id="invite-email" href="#">✉️ Email it</a>
+            <button class="primary-btn invite-send" id="invite-send" type="submit">✉️ Send invite</button>
+            <p class="form-msg" id="invite-status" role="status"></p>
+            <div class="invite-alt">
+              <span class="muted small">Or share it yourself:</span>
               <button class="pill-btn" id="invite-copy" type="button">🔗 Copy link</button>
               <button class="pill-btn" id="invite-share" type="button" hidden>Share…</button>
             </div>
-            <p class="form-msg" id="invite-status" role="status"></p>
           </form>
         </dialog>`);
       dlg = $("invite-dialog");
-      const sync = () => {
-        const to = $("invite-to").value.trim();
-        const isEmail = to.includes("@");
-        const body = $("invite-msg").value;
-        const phone = isEmail ? "" : to.replace(/[^\d+]/g, "");
-        // "?&body=" works for both iOS and Android Messages
-        $("invite-sms").href = `sms:${phone}?&body=${encodeURIComponent(body)}`;
-        $("invite-email").href = `mailto:${isEmail ? encodeURIComponent(to) : ""}?subject=${encodeURIComponent(`${inviteFrom || "A friend"} invited you to IRA Portfolio`)}&body=${encodeURIComponent(body)}`;
-      };
-      dlg.addEventListener("input", sync);
-      dlg.syncInvite = sync;
+      const status = (text, kind) => { $("invite-status").textContent = text; $("invite-status").dataset.kind = kind; };
+      $("invite-close").addEventListener("click", () => dlg.close());
+      $("invite-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = $("invite-to").value.trim();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return status("Enter their email address.", "error");
+        const btn = $("invite-send");
+        btn.disabled = true;
+        status("Sending…", "info");
+        const err = await sendInvite(email, $("invite-note").value.trim());
+        btn.disabled = false;
+        if (err) return status(err, "error");
+        status(`Invite sent to ${email} ✓`, "success");
+        $("invite-to").value = "";
+        $("invite-note").value = "";
+      });
       $("invite-copy").addEventListener("click", async () => {
-        const link = inviteLink($("invite-to").value.includes("@") ? $("invite-to").value.trim() : "");
+        const link = inviteLink("");
         try {
           await navigator.clipboard.writeText(link);
-          $("invite-status").textContent = "Link copied ✓";
+          status("Link copied ✓ Paste it into a text or chat.", "success");
         } catch {
-          $("invite-status").textContent = link;
+          status(link, "info");
         }
-        $("invite-status").dataset.kind = "success";
       });
       if (navigator.share) {
         $("invite-share").hidden = false;
         $("invite-share").addEventListener("click", () =>
-          navigator.share({ title: "IRA Portfolio", text: $("invite-msg").value }).catch(() => {}));
+          navigator.share({ title: "IRA Portfolio", text: shareText() }).catch(() => {}));
       }
     }
     $("invite-to").value = to;
     $("invite-status").textContent = "";
-    $("invite-msg").value =
-      `${inviteFrom || "I"} invited you to IRA Portfolio — the retirement tracker for stocks, seafood, gold bars and haunted sheds. ` +
-      `Make your account here: ${inviteLink(to.includes("@") ? to : "")}`;
-    dlg.syncInvite();
     dlg.showModal();
   }
 
