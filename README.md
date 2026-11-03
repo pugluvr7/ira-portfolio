@@ -13,6 +13,8 @@ retirement holdings — stocks, seafood, precious metals, real estate and cash.
   when you send a transfer, so you don't have to type their email.
 - **Transfers** — send part of any holding to a friend or to any account by email. They get a badge and banner,
   and the assets only move when they accept. Senders can cancel while it's pending.
+- **Push notifications** — turn them on per device (Edit portfolio → Notifications) to get an alert
+  for new transfers and friend requests. On iPhone, add the site to your Home Screen first.
 - **Invite a friend** — the ✉️ Invite button emails a friend an invite straight from the site
   (10 per person per day), or copies/shares the link; it opens straight onto Create account.
 
@@ -52,6 +54,23 @@ Invites are sent by a Supabase Edge Function through [Resend](https://resend.com
    custom SMTP with host `smtp.resend.com`, port `465`, user `resend`, password = your Resend API key,
    and a sender on your verified domain.
 
+## Push notifications (optional)
+
+Alerts use standard Web Push (no paid service). The site's public VAPID key is in `config.js`;
+the matching private key is a Supabase secret.
+
+1. **Database:** run [`supabase/push.sql`](supabase/push.sql) in the SQL Editor.
+2. **Deploy the function:** **Edge Functions → Deploy a new function → Via Editor**, name it exactly
+   `send-push`, paste [`supabase/functions/send-push/index.ts`](supabase/functions/send-push/index.ts),
+   deploy, and turn **off** "Verify JWT with legacy secret".
+3. **Secrets:** add `VAPID_PRIVATE_KEY` (the private key generated for this site — keep it out of the
+   repo) and optionally `VAPID_SUBJECT` = `mailto:you@example.com`.
+4. On a phone or computer, open **Edit portfolio → Notifications → Turn on notifications**, then
+   **Send a test**.
+
+To use your own key pair instead, generate one (`npx web-push generate-vapid-keys`), put the public
+key in `config.js` and in a `VAPID_PUBLIC_KEY` secret, and the private key in `VAPID_PRIVATE_KEY`.
+
 ## Run it
 
 ```bash
@@ -74,6 +93,9 @@ from disk won't work well with login — serve the folder.)
 - `supabase/schema.sql` – tables, row-level security policies and the new-user trigger
 - `supabase/transfers.sql` – transfers table and the create/respond/cancel functions that move assets
 - `supabase/friends.sql` – friendships and their functions, plus transfer-to-friend
+- `supabase/push.sql` – push subscriptions and the "already alerted" markers
+- `supabase/functions/send-push/index.ts` – Edge Function that sends Web Push alerts
+- `sw.js`, `manifest.webmanifest`, `icons/` – service worker and app manifest (installable, push-capable)
 - `supabase/invites.sql` – invite log and the limits check used by the invite function
 - `supabase/functions/send-invite/index.ts` – Edge Function that emails invites via Resend
 - `styles.css` – styling and light/dark theme tokens

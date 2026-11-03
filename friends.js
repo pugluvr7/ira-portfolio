@@ -1,5 +1,5 @@
 (function () {
-  const { start, db, refreshNotices, openInvite, esc } = window.UI;
+  const { start, db, refreshNotices, openInvite, notifyRecipients, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
   const say = (el, text, kind = "success") => { el.textContent = text; el.dataset.kind = kind; };
   const when = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -96,6 +96,7 @@
         }
         return;
       }
+      if (data === "requested") notifyRecipients();
       form.reset();
       await reload();
       say(msg, data === "accepted" ? "They'd already asked — you're friends now ✓" : "Request sent ✓");

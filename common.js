@@ -128,6 +128,8 @@
       </div>`;
     $("invite-btn").addEventListener("click", () => openInvite({ from: P.holder }));
     $("sign-out").addEventListener("click", async () => {
+      // stop this device getting alerts for an account that's no longer signed in here
+      await push.disable().catch(() => {});
       await db.auth.signOut();
       location.href = "login.html";
     });
@@ -265,6 +267,61 @@
       </div>`);
   }
 
+  // ---------- push notifications (per device) ----------
+  // sw.js shows the alerts; supabase/functions/send-push sends them.
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isStandalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const push = {
+    // "unsupported" | "needs-home-screen" | "blocked" | "off" | "on"
+    async status() {
+      if (isIOS && !isStandalone) return "needs-home-screen";
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !window.isSecureContext) return "unsupported";
+      if (Notification.permission === "denied") return "blocked";
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = reg && (await reg.pushManager.getSubscription());
+      return sub && Notification.permission === "granted" ? "on" : "off";
+    },
+    async enable() {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") throw new Error(permission === "denied"
+        ? "Notifications are blocked for this site. Allow them in your browser settings, then try again."
+        : "Notifications weren't allowed.");
+      const reg = await navigator.serviceWorker.register("sw.js");
+      await navigator.serviceWorker.ready;
+      const key = Uint8Array.from(atob(cfg.vapidPublicKey.replace(/-/g, "+").replace(/_/g, "/")), (ch) => ch.charCodeAt(0));
+      const sub = (await reg.pushManager.getSubscription()) ||
+        (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }));
+      const { endpoint, keys } = sub.toJSON();
+      const { error } = await db.rpc("save_push_subscription", {
+        p_endpoint: endpoint, p_p256dh: keys.p256dh, p_auth: keys.auth, p_user_agent: navigator.userAgent,
+      });
+      if (error) throw new Error(/save_push_subscription/.test(error.message)
+        ? "Push isn't set up in the database yet — run supabase/push.sql." : error.message);
+    },
+    async disable() {
+      const reg = await navigator.serviceWorker?.getRegistration();
+      const sub = reg && (await reg.pushManager.getSubscription());
+      if (!sub) return;
+      await db.rpc("delete_push_subscription", { p_endpoint: sub.endpoint });
+      await sub.unsubscribe();
+    },
+    async test() {
+      const { data, error } = await db.functions.invoke("send-push", { body: { test: true } });
+      if (error) {
+        let message = error.message;
+        try { message = (await error.context.json()).error || message; } catch { /* keep generic message */ }
+        throw new Error(message);
+      }
+      return data;
+    },
+  };
+  // Called after sending a transfer or friend request: alerts the recipient's devices.
+  // Fire-and-forget — the request itself already succeeded, and the in-app badge still works.
+  function notifyRecipients() {
+    if (!db) return;
+    db.functions.invoke("send-push", { body: {} }).catch(() => {});
+  }
+
   // ---------- page bootstrap for signed-in pages ----------
   async function start(render) {
     if (!configured) return showSetupNeeded();
@@ -291,5 +348,5 @@
     }
   }
 
-  window.UI = { db, configured, start, loadPortfolio, refreshNotices, openInvite, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
+  window.UI = { db, configured, start, loadPortfolio, refreshNotices, openInvite, push, notifyRecipients, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
 })();

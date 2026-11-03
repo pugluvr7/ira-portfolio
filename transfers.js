@@ -1,5 +1,5 @@
 (function () {
-  const { start, db, loadPortfolio, refreshNotices, openInvite, colorOf, esc } = window.UI;
+  const { start, db, loadPortfolio, refreshNotices, openInvite, notifyRecipients, colorOf, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
 
   const usd0 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -130,6 +130,7 @@
         }
         return;
       }
+      notifyRecipients();
       const keepFriend = f.friend.value;
       form.reset();
       f.friend.value = keepFriend;

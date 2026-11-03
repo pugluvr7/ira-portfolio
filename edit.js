@@ -1,5 +1,5 @@
 (function () {
-  const { start, db, loadPortfolio, classes, colorOf, esc } = window.UI;
+  const { start, db, loadPortfolio, push, classes, colorOf, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
 
   const say = (el, text, kind = "success") => {
@@ -63,6 +63,40 @@
       if (error) return say(msg, error.message, "error");
       say(msg, "Saved ✓");
     });
+
+    // ---------- notifications (this device) ----------
+    const TEXT = {
+      unsupported: "This browser can't do push notifications. Try Chrome, Edge, Firefox or Safari on a phone or computer.",
+      "needs-home-screen": "On iPhone and iPad, notifications only work once the site is on your Home Screen: tap Share → Add to Home Screen, then open IRA from there and come back to this page.",
+      blocked: "Notifications are blocked for this site. Allow them in your browser's site settings, then reload.",
+      off: "Get an alert on this device when someone sends you a transfer or a friend request.",
+      on: "On for this device ✓ You'll get an alert for new transfers and friend requests.",
+    };
+    async function renderNotify() {
+      const state = await push.status();
+      $("notify-text").textContent = TEXT[state];
+      $("notify-actions").innerHTML =
+        state === "off" ? `<button class="primary-btn" data-push="enable" type="button">Turn on notifications</button>`
+        : state === "on" ? `<button class="pill-btn" data-push="test" type="button">Send a test</button>
+                            <button class="ghost-btn" data-push="disable" type="button">Turn off</button>`
+        : "";
+    }
+    $("notify-actions").addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-push]");
+      if (!btn) return;
+      const msg = $("notify-msg");
+      btn.disabled = true;
+      try {
+        if (btn.dataset.push === "enable") { await push.enable(); say(msg, "Notifications turned on ✓"); }
+        if (btn.dataset.push === "disable") { await push.disable(); say(msg, "Turned off for this device."); }
+        if (btn.dataset.push === "test") { await push.test(); say(msg, "Test sent — it should pop up in a few seconds."); }
+      } catch (err) {
+        say(msg, err.message || String(err), "error");
+      }
+      btn.disabled = false;
+      renderNotify();
+    });
+    renderNotify();
 
     // ---------- holdings ----------
     const list = $("holding-list");
