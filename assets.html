@@ -6,23 +6,8 @@
   <title>Asset visualization · IRA Portfolio</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <div>
-          <div class="brand-name" id="account-name">IRA Portfolio</div>
-          <div class="brand-meta" id="account-meta"></div>
-        </div>
-      </div>
-      <div class="tabs" role="navigation" aria-label="Pages">
-        <a href="index.html">Dashboard</a>
-        <a href="assets.html">Asset visualization</a>
-      </div>
-      <button id="theme-toggle" class="pill-btn" type="button" aria-label="Toggle dark mode"></button>
-    </div>
-  </nav>
+<body class="is-loading">
+  <nav class="nav" id="nav"></nav>
 
   <main>
     <header class="holder">
@@ -48,9 +33,10 @@
 
   <div class="tooltip" id="tooltip" role="status" hidden></div>
 
-  <footer>Sample data — edit <code>data.js</code> to use your own. Not financial advice. Definitely not seafood advice.</footer>
+  <footer>Not financial advice. Definitely not seafood advice.</footer>
 
-  <script src="data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="common.js"></script>
   <script src="assets.js"></script>
 </body>

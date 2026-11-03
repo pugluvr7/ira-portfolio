@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in · IRA Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-page">
+  <button id="theme-toggle" class="pill-btn auth-theme" type="button" aria-label="Toggle dark mode"></button>
+
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <div class="auth-brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="brand-name">IRA Portfolio</div>
+          <div class="brand-meta">Retirement, but make it seafood.</div>
+        </div>
+      </div>
+
+      <div class="segmented auth-tabs" role="tablist" aria-label="Sign in or create account">
+        <button type="button" role="tab" data-mode="signin" class="active" aria-selected="true">Sign in</button>
+        <button type="button" role="tab" data-mode="signup" aria-selected="false">Create account</button>
+      </div>
+
+      <form id="auth-form" class="auth-form" novalidate>
+        <label class="field signup-only" hidden>
+          <span>Your name</span>
+          <input id="display-name" name="display_name" type="text" autocomplete="name" placeholder="Wendy" maxlength="40" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input id="email" name="email" type="email" autocomplete="email" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input id="password" name="password" type="password" autocomplete="current-password" minlength="6" required />
+        </label>
+        <p class="form-msg" id="form-msg" role="status"></p>
+        <button class="primary-btn" id="submit-btn" type="submit">Sign in</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="common.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>

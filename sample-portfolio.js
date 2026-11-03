@@ -1,6 +1,6 @@
-// Portfolio data — edit this file to reflect your real account.
-// Everything on the page is derived from what's here.
-window.PORTFOLIO = {
+// The joke sample portfolio. New accounts start empty; the Edit portfolio page
+// offers a "Load the joke sample" button that copies these holdings into the database.
+window.SAMPLE_PORTFOLIO = {
   account: {
     name: "Roth IRA",
     owner: "My Retirement",

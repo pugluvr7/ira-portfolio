@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit portfolio · IRA Portfolio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="is-loading">
+  <nav class="nav" id="nav"></nav>
+
+  <main>
+    <header class="holder">
+      <span class="eyebrow">Edit portfolio</span>
+      <h1 class="holder-name">Your stuff</h1>
+      <p class="page-sub">Changes save to your account. Only you can see them.</p>
+    </header>
+
+    <div class="edit-grid">
+      <section class="card" aria-labelledby="profile-title">
+        <div class="card-head"><h2 id="profile-title">Account</h2></div>
+        <form id="profile-form" class="form-grid" novalidate>
+          <label class="field"><span>Your name</span><input name="display_name" type="text" maxlength="40" required /></label>
+          <label class="field"><span>Account name</span><input name="account_name" type="text" maxlength="40" /></label>
+          <label class="field"><span>Custodian</span><input name="custodian" type="text" maxlength="40" /></label>
+          <label class="field"><span>Annual contribution limit</span><input name="contribution_limit" type="number" min="0" step="any" /></label>
+          <label class="field"><span>Contributed this year</span><input name="contributed_ytd" type="number" min="0" step="any" /></label>
+          <label class="field"><span>Lifetime contributions</span><input name="lifetime_contributions" type="number" min="0" step="any" /></label>
+          <div class="form-actions">
+            <span class="form-msg" id="profile-msg" role="status"></span>
+            <button class="primary-btn" type="submit">Save account</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="targets-title">
+        <div class="card-head">
+          <h2 id="targets-title">Target allocation</h2>
+          <span class="badge" id="targets-sum"></span>
+        </div>
+        <form id="targets-form" class="targets-list" novalidate></form>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="holdings-title">
+      <div class="card-head">
+        <div>
+          <h2 id="holdings-title">Holdings</h2>
+          <p class="muted small" id="holdings-count"></p>
+        </div>
+        <div class="head-actions">
+          <button class="pill-btn" id="load-sample" type="button">🦞 Load the joke sample</button>
+          <button class="primary-btn" id="add-holding" type="button">+ Add holding</button>
+        </div>
+      </div>
+      <div id="holding-list" class="holding-list"></div>
+    </section>
+  </main>
+
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+
+  <footer>Not financial advice.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="sample-portfolio.js"></script>
+  <script src="common.js"></script>
+  <script src="edit.js"></script>
+</body>
+</html>
