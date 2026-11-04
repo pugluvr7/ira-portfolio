@@ -54,12 +54,19 @@
       $("friends").innerHTML = friends.length
         ? friends.map((f) => `
             <article class="friend-card">
-              <span class="person-avatar big" aria-hidden="true">${initial(f.friend_name)}</span>
-              <div class="person-name">${esc(f.friend_name)}</div>
+              <a class="friend-card-link" href="public.html?id=${encodeURIComponent(f.friend_id)}" aria-label="View ${esc(f.friend_name)}'s profile">
+                <span class="friend-avatar-wrap">
+                  <span class="person-avatar big" aria-hidden="true">${initial(f.friend_name)}</span>
+                  ${f.friend_spirit ? `<span class="friend-spirit" aria-hidden="true">${esc(f.friend_spirit)}</span>` : ""}
+                </span>
+                <span class="person-name">${esc(f.friend_name)}</span>
+              </a>
+              ${f.friend_tagline ? `<div class="friend-tagline">${esc(f.friend_tagline)}</div>` : ""}
               <div class="muted small">${esc(f.friend_email)}</div>
               <div class="muted small">Friends since ${when(f.since)}</div>
               <div class="friend-actions">
                 <a class="primary-btn" href="transfers.html?to=${encodeURIComponent(f.friend_id)}">Send assets →</a>
+                <a class="pill-btn" href="public.html?id=${encodeURIComponent(f.friend_id)}">View profile</a>
                 <button class="ghost-btn danger" data-action="remove" data-id="${f.friendship_id}" type="button">Remove</button>
               </div>
             </article>`).join("")

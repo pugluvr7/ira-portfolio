@@ -22,13 +22,54 @@
         <h1 class="holder-name" id="profile-name"></h1>
         <p class="muted" id="profile-meta"></p>
       </div>
-      <nav class="profile-jump" aria-label="Profile sections">
-        <a class="pill-btn" href="#portfolio">Edit portfolio</a>
-        <a class="pill-btn" href="#settings">Settings</a>
-      </nav>
     </header>
 
-    <h2 class="section-title" id="portfolio">Edit portfolio</h2>
+    <div class="segmented profile-tabs" role="tablist" aria-label="Profile sections">
+      <a role="tab" href="#public" data-tab="public">Public profile</a>
+      <a role="tab" href="#portfolio" data-tab="portfolio">Edit portfolio</a>
+      <a role="tab" href="#settings" data-tab="settings">Settings</a>
+    </div>
+
+    <div class="tab-panel" data-panel="public" role="tabpanel">
+      <p class="muted small section-sub">Only your friends can see this. Your balance and holdings stay private unless you switch them on.</p>
+      <div class="edit-grid">
+        <section class="card" aria-labelledby="public-title">
+          <div class="card-head"><h2 id="public-title">Public profile</h2></div>
+          <form id="public-form" class="public-form" novalidate>
+            <label class="field"><span>Tagline</span>
+              <input name="tagline" type="text" maxlength="80" placeholder="Professional lobster wrangler" />
+            </label>
+            <label class="field"><span>About me</span>
+              <textarea name="about" rows="4" maxlength="400" placeholder="Saving for retirement one shrimp ring at a time."></textarea>
+            </label>
+            <div class="form-grid two">
+              <label class="field"><span>Location</span>
+                <input name="location" type="text" maxlength="40" placeholder="The bathtub" />
+              </label>
+              <label class="field"><span>Spirit asset (an emoji)</span>
+                <input name="spirit_asset" type="text" maxlength="8" placeholder="🦞" class="emoji-input" />
+              </label>
+            </div>
+            <label class="toggle"><input type="checkbox" name="show_balance" /><span>Show my total balance to friends</span></label>
+            <label class="toggle"><input type="checkbox" name="show_holdings" /><span>Show my holdings to friends (with pictures)</span></label>
+            <div class="form-actions">
+              <span class="form-msg" id="public-msg" role="status"></span>
+              <button class="primary-btn" type="submit">Save public profile</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="preview-title">
+          <div class="card-head">
+            <h2 id="preview-title">How friends see you</h2>
+            <a class="link-btn small" id="preview-link" href="#">Open full preview →</a>
+          </div>
+          <div id="public-preview"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-panel="portfolio" role="tabpanel" hidden>
     <p class="muted small section-sub">Changes save to your account. Only you can see them.</p>
 
     <div class="edit-grid">
@@ -69,8 +110,9 @@
       </div>
       <div id="holding-list" class="holding-list"></div>
     </section>
+    </div>
 
-    <h2 class="section-title" id="settings">Settings</h2>
+    <div class="tab-panel" data-panel="settings" role="tabpanel" hidden>
     <p class="muted small section-sub">These apply to this device unless noted.</p>
 
     <section class="card notify-card" aria-labelledby="notify-title">
@@ -93,6 +135,7 @@
         <button class="ghost-btn danger" id="settings-sign-out" type="button">Sign out</button>
       </div>
     </section>
+    </div>
   </main>
 
   <div class="tooltip" id="tooltip" role="status" hidden></div>

@@ -7,13 +7,17 @@ retirement holdings — stocks, seafood, precious metals, real estate and cash.
 
 - **Dashboard** — balance, gains, contribution progress, value-over-time chart, allocation vs. target, holdings.
 - **Asset visualization** — every holding as pictures: a tile "vault" and a gallery card per asset.
-- **Profile** (top right) — edit your portfolio (account details, target allocation, add/edit/delete holdings)
-  and Settings (notifications, sign out). Holdings can be anything from stocks to live lobsters.
+- **Profile menu** (top right) — Profile, Edit portfolio, Friends, Settings, Sign out.
+- **Profile page** — tabs for **Public profile** (tagline, about, location, spirit asset, and opt-in
+  sharing of your balance/holdings with friends, with a live preview), **Edit portfolio** (account
+  details, target allocation, holdings — anything from stocks to live lobsters) and **Settings**
+  (notifications, sign out).
+- **Public profiles** — friends can view each other's public profile from the Friends page.
 - **Friends** — add other users by email; they accept or decline. Friends show up in a picker
   when you send a transfer, so you don't have to type their email.
 - **Transfers** — send part of any holding to a friend or to any account by email. They get a badge and banner,
   and the assets only move when they accept. Senders can cancel while it's pending.
-- **Push notifications** — turn them on per device (Profile → Settings → Notifications) to get an alert
+- **Push notifications** — turn them on per device (Profile menu → Settings → Notifications) to get an alert
   for new transfers and friend requests. On iPhone, add the site to your Home Screen first.
 - **Invite a friend** — the ✉️ Invite button emails a friend an invite straight from the site
   (10 per person per day), or copies/shares the link; it opens straight onto Create account.
@@ -27,7 +31,8 @@ each user's profile and holdings, protected by row-level security so people only
 1. **Create a Supabase project** at https://supabase.com/dashboard (the free tier is fine).
 2. **Create the tables:** in the project, open **SQL Editor → New query**, paste
    [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. Then do the same with
-   [`supabase/transfers.sql`](supabase/transfers.sql) and then [`supabase/friends.sql`](supabase/friends.sql).
+   [`supabase/transfers.sql`](supabase/transfers.sql), [`supabase/friends.sql`](supabase/friends.sql) and
+   [`supabase/public-profile.sql`](supabase/public-profile.sql).
 3. **Point auth at the site:** **Authentication → URL Configuration → Site URL** =
    `http://localhost:5173` (or wherever you host it).
    Optional: to let people sign in without confirming their email first, turn off
@@ -85,6 +90,7 @@ from disk won't work well with login — serve the folder.)
 - `index.html` + `app.js` – dashboard
 - `assets.html` + `assets.js` – asset visualization
 - `profile.html` + `profile.js` – profile: edit portfolio (account, targets, holdings) and settings
+- `public.html` + `public.js` – a friend's public profile (only visible to friends)
 - `edit.html` – redirect to the profile page for old links
 - `transfers.html` + `transfers.js` – send, accept, decline and cancel transfers
 - `friends.html` + `friends.js` – add, accept, decline and remove friends
@@ -94,6 +100,7 @@ from disk won't work well with login — serve the folder.)
 - `supabase/schema.sql` – tables, row-level security policies and the new-user trigger
 - `supabase/transfers.sql` – transfers table and the create/respond/cancel functions that move assets
 - `supabase/friends.sql` – friendships and their functions, plus transfer-to-friend
+- `supabase/public-profile.sql` – public profile fields and the friends-only `get_public_profile()`
 - `supabase/push.sql` – push subscriptions and the "already alerted" markers
 - `supabase/functions/send-push/index.ts` – Edge Function that sends Web Push alerts
 - `sw.js`, `manifest.webmanifest`, `icons/` – service worker and app manifest (installable, push-capable)

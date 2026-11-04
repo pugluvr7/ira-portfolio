@@ -592,3 +592,70 @@ a.brand { color: inherit; text-decoration: none; }
 .section-title { font-size: 24px; font-weight: 750; letter-spacing: -0.02em; margin: 36px 0 2px; scroll-margin-top: 90px; }
 .section-sub { margin: 0 0 16px; }
 .notify-card + .notify-card { margin-top: -6px; }
+
+/* profile chip: dot for pending friend requests; badge inside the menu */
+.profile-chip { position: relative; }
+.profile-dot {
+  position: absolute; left: 26px; top: 3px; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--down); box-shadow: 0 0 0 2px var(--surface);
+}
+.profile-dropdown a { display: flex; align-items: center; justify-content: space-between; }
+.profile-dropdown a[aria-current="page"] { font-weight: 650; }
+
+/* ---------- profile tabs ---------- */
+.profile-tabs { display: inline-flex; margin: 0 0 18px; }
+.profile-tabs a { padding: 7px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--text-2); text-decoration: none; }
+.profile-tabs a:hover { color: var(--text); }
+.profile-tabs a.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(31, 23, 36, 0.12); }
+.profile-hero { margin-bottom: 20px; }
+
+/* ---------- public profile editor ---------- */
+.public-form { display: flex; flex-direction: column; gap: 14px; }
+.form-grid.two { grid-template-columns: 1fr 1fr; }
+.emoji-input { font-size: 20px; }
+.toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--primary-ink); }
+.link-btn.small { font-size: 13px; text-decoration: none; }
+.link-btn.small:hover { text-decoration: underline; }
+
+/* ---------- public profile card ---------- */
+.pub-card { position: relative; border-radius: 20px; border: 1px solid var(--border); background: var(--page); overflow: hidden; padding: 0 22px 22px; }
+.pub-banner { height: 84px; margin: 0 -22px; background: linear-gradient(135deg, var(--primary), #ead6e6 45%, var(--secondary)); }
+.pub-head { display: flex; align-items: flex-end; gap: 10px; margin-top: -40px; }
+.pub-avatar { width: 80px; height: 80px; font-size: 34px; box-shadow: 0 0 0 4px var(--page); }
+.pub-spirit {
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px;
+  background: var(--surface); box-shadow: 0 0 0 3px var(--page), var(--shadow); margin-left: -26px; margin-bottom: -2px;
+}
+.pub-name { font-size: 24px; margin: 12px 0 2px; letter-spacing: -0.02em; }
+.pub-tagline { margin: 0; font-size: 15px; font-weight: 550; }
+.pub-meta { margin-top: 6px; }
+.pub-about { margin: 14px 0 0; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
+.pub-stat { display: flex; flex-direction: column; margin-top: 16px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+.pub-stat strong { font-size: 24px; letter-spacing: -0.02em; }
+.pub-section-label { margin: 16px 0 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.pub-holdings { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.pub-holding {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 10px 8px;
+  border-radius: 14px; background: color-mix(in srgb, var(--c) 10%, var(--surface)); border: 1px solid var(--border);
+}
+.pub-holding-pic { font-size: 30px; line-height: 1.1; }
+.pub-holding-pic img { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
+.pub-holding-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.pub-private { margin: 16px 0 0; }
+.public-page .pub-card { max-width: 640px; margin: 0 auto; background: var(--surface); box-shadow: var(--shadow); }
+.public-page .pub-avatar, .public-page .pub-spirit { box-shadow: 0 0 0 4px var(--surface); }
+.public-actions { display: flex; gap: 10px; justify-content: center; margin: 18px 0 0; }
+.back-link { margin: 0 0 16px; font-size: 14px; }
+.back-link a { color: var(--primary-ink); text-decoration: none; font-weight: 600; }
+.public-note { text-align: center; margin-top: 14px; }
+.public-note a { color: var(--primary-ink); }
+.friend-card-link { display: flex; flex-direction: column; align-items: center; gap: 4px; color: inherit; text-decoration: none; }
+.friend-card-link:hover .person-name { text-decoration: underline; }
+.friend-avatar-wrap { position: relative; margin-bottom: 6px; }
+.friend-spirit {
+  position: absolute; right: -6px; bottom: -4px; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 16px; background: var(--surface); box-shadow: 0 0 0 2px var(--page);
+}
+.friend-tagline { font-size: 13px; font-weight: 550; margin: 2px 0 4px; }
+.friend-actions .pill-btn { text-decoration: none; color: var(--text); font-size: 13px; padding: 6px 12px; box-shadow: none; }

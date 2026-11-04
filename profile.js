@@ -1,5 +1,5 @@
 (function () {
-  const { start, db, loadPortfolio, push, signOut, classes, colorOf, esc } = window.UI;
+  const { start, db, loadPortfolio, push, signOut, renderPublicProfile, classes, colorOf, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
 
   const say = (el, text, kind = "success") => {
@@ -21,9 +21,60 @@
     $("profile-meta").textContent = `${user.email} · Member since ${since}`;
     $("signout-text").textContent = `Signed in as ${user.email}. Signing out also turns off notifications on this device.`;
     $("settings-sign-out").addEventListener("click", signOut);
-    // jump to #portfolio / #settings when arriving from the profile menu
-    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
-    const refresh = async () => { state = await loadPortfolio(user.id); renderHoldings(); };
+    // ---------- tabs: #public (default) | #portfolio | #settings ----------
+    const TABS = ["public", "portfolio", "settings"];
+    function showTab() {
+      const tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "public";
+      document.querySelectorAll(".tab-panel").forEach((el) => (el.hidden = el.dataset.panel !== tab));
+      document.querySelectorAll(".profile-tabs [data-tab]").forEach((a) => {
+        a.classList.toggle("active", a.dataset.tab === tab);
+        a.setAttribute("aria-selected", a.dataset.tab === tab);
+      });
+    }
+    addEventListener("hashchange", showTab);
+    showTab();
+
+    // ---------- public profile (what friends see) ----------
+    const pub = $("public-form");
+    const PUBLIC_FIELDS = ["tagline", "about", "location", "spirit_asset"];
+    for (const k of PUBLIC_FIELDS) pub.elements[k].value = state.profile[k] || "";
+    pub.elements.show_balance.checked = !!state.profile.show_balance;
+    pub.elements.show_holdings.checked = !!state.profile.show_holdings;
+    $("preview-link").href = `public.html?id=${encodeURIComponent(user.id)}`;
+    function renderPreview() {
+      const holdings = state.holdings.map((h) => ({
+        symbol: h.symbol, name: h.name, asset_class: h.assetClass, shares: h.shares, unit: h.unit,
+        price: h.price, picture: h.picture, image: h.image, value: h.shares * h.price,
+      })).sort((a, b) => b.value - a.value);
+      $("public-preview").innerHTML = renderPublicProfile({
+        display_name: pf.elements.display_name.value.trim() || state.holder,
+        ...Object.fromEntries(PUBLIC_FIELDS.map((k) => [k, pub.elements[k].value.trim()])),
+        member_since: state.profile.created_at,
+        show_balance: pub.elements.show_balance.checked,
+        show_holdings: pub.elements.show_holdings.checked,
+        total_value: holdings.reduce((s, h) => s + h.value, 0),
+        holdings,
+      });
+    }
+    pub.addEventListener("input", renderPreview);
+    pub.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = $("public-msg");
+      const row = {
+        ...Object.fromEntries(PUBLIC_FIELDS.map((k) => [k, pub.elements[k].value.trim()])),
+        show_balance: pub.elements.show_balance.checked,
+        show_holdings: pub.elements.show_holdings.checked,
+      };
+      const { error } = await db.from("profiles").update(row).eq("id", user.id);
+      if (error) {
+        return say(msg, /tagline|about|spirit_asset|show_balance|location/.test(error.message)
+          ? "Public profiles aren't set up in the database yet — run supabase/public-profile.sql."
+          : error.message, "error");
+      }
+      Object.assign(state.profile, row);
+      say(msg, "Saved ✓");
+    });
+    const refresh = async () => { state = await loadPortfolio(user.id); renderHoldings(); renderPreview(); };
 
     // ---------- account ----------
     const pf = $("profile-form");
@@ -47,6 +98,7 @@
       document.querySelectorAll(".profile-chip-name, .profile-dropdown-head .person-name").forEach((n) => (n.textContent = f.display_name.value.trim()));
       document.querySelector("#profile-btn .user-avatar").textContent = f.display_name.value.trim().slice(0, 1).toUpperCase();
       renderHero(f.display_name.value.trim());
+      renderPreview();
     });
 
     // ---------- targets ----------
@@ -112,6 +164,7 @@
       renderNotify();
     });
     renderNotify();
+    renderPreview(); // first render, now that the account form above exists
 
     // ---------- holdings ----------
     const list = $("holding-list");

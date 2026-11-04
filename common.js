@@ -98,9 +98,8 @@
     ["index.html", "Dashboard"],
     ["assets.html", "Asset visualization"],
     ["transfers.html", "Transfers"],
-    ["friends.html", "Friends"],
   ];
-  const BADGES = { "transfers.html": "transfer-badge", "friends.html": "friend-badge" };
+  const BADGES = { "transfers.html": "transfer-badge" };
   function renderNav(P) {
     const nav = $("nav");
     if (!nav) return;
@@ -122,9 +121,10 @@
           <button id="invite-btn" class="pill-btn invite-pill" type="button">✉️ Invite</button>
           <button id="theme-toggle" class="pill-btn" type="button" aria-label="Toggle dark mode"></button>
           <div class="profile-menu">
-            <button id="profile-btn" class="profile-chip${page === "profile.html" ? " is-current" : ""}" type="button"
+            <button id="profile-btn" class="profile-chip${["profile.html", "friends.html", "public.html"].includes(page) ? " is-current" : ""}" type="button"
                     aria-haspopup="menu" aria-expanded="false" aria-controls="profile-dropdown">
               <span class="user-avatar" aria-hidden="true">${esc((P.holder || "?").slice(0, 1).toUpperCase())}</span>
+              <span class="profile-dot" id="profile-dot" hidden></span>
               <span class="profile-chip-name">${esc(P.holder)}</span>
               <span class="profile-caret" aria-hidden="true">▾</span>
             </button>
@@ -133,10 +133,11 @@
                 <div class="person-name">${esc(P.holder)}</div>
                 <div class="muted small">${esc(P.email || "")}</div>
               </div>
-              <a role="menuitem" href="profile.html">👤 Profile</a>
-              <a role="menuitem" href="profile.html#portfolio">✏️ Edit portfolio</a>
-              <a role="menuitem" href="profile.html#settings">⚙️ Settings</a>
-              <button role="menuitem" type="button" id="sign-out" class="menu-danger">🚪 Sign out</button>
+              <a role="menuitem" href="profile.html#public">Profile</a>
+              <a role="menuitem" href="profile.html#portfolio">Edit portfolio</a>
+              <a role="menuitem" href="friends.html"${page === "friends.html" ? ' aria-current="page"' : ""}>Friends<span class="tab-badge" id="friend-badge" hidden></span></a>
+              <a role="menuitem" href="profile.html#settings">Settings</a>
+              <button role="menuitem" type="button" id="sign-out" class="menu-danger">Sign out</button>
             </div>
           </div>
         </div>
@@ -267,6 +268,8 @@
     const setBadge = (id, n) => { const b = $(id); if (b) { b.hidden = !n; b.textContent = n; } };
     setBadge("transfer-badge", transfers.length);
     setBadge("friend-badge", requests.length);
+    const dot = $("profile-dot");
+    if (dot) { dot.hidden = !requests.length; dot.title = `${requests.length} friend request${requests.length === 1 ? "" : "s"}`; }
 
     document.getElementById("notice-banner")?.remove();
     const page = location.pathname.split("/").pop() || "";
@@ -347,6 +350,43 @@
     db.functions.invoke("send-push", { body: {} }).catch(() => {});
   }
 
+  // ---------- public profile card (shared by the profile preview and public.html) ----------
+  // p: the shape returned by get_public_profile()
+  function renderPublicProfile(p) {
+    const usd0 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+    const num = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+    const month = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const meta = [
+      p.location && `📍 ${esc(p.location)}`,
+      p.member_since && `Member since ${month(p.member_since)}`,
+      p.friends_since && `Friends since ${month(p.friends_since)}`,
+    ].filter(Boolean).join(" · ");
+    const holdings = p.holdings || [];
+    return `
+      <article class="pub-card">
+        <div class="pub-banner" aria-hidden="true"></div>
+        <div class="pub-head">
+          <span class="person-avatar pub-avatar" aria-hidden="true">${esc((p.display_name || "?").slice(0, 1).toUpperCase())}</span>
+          ${p.spirit_asset ? `<span class="pub-spirit" title="Spirit asset">${esc(p.spirit_asset)}</span>` : ""}
+        </div>
+        <h2 class="pub-name">${esc(p.display_name)}</h2>
+        ${p.tagline ? `<p class="pub-tagline">${esc(p.tagline)}</p>` : `<p class="pub-tagline muted">No tagline yet</p>`}
+        ${meta ? `<div class="pub-meta muted small">${meta}</div>` : ""}
+        ${p.about ? `<p class="pub-about">${esc(p.about)}</p>` : ""}
+        ${p.show_balance && p.total_value != null ? `
+          <div class="pub-stat"><span class="muted small">Total balance</span><strong>${usd0.format(+p.total_value)}</strong></div>` : ""}
+        ${p.show_holdings ? `
+          <div class="pub-section-label muted small">Holdings</div>
+          ${holdings.length ? `<div class="pub-holdings">${holdings.map((h) => `
+            <div class="pub-holding" style="--c:${colorOf(h.asset_class)}" title="${esc(h.name)}">
+              <span class="pub-holding-pic" aria-hidden="true">${h.image ? `<img src="${esc(h.image)}" alt="" />` : esc(h.picture || "📦")}</span>
+              <span class="pub-holding-name">${esc(h.name || h.symbol)}</span>
+              <span class="muted small">${num.format(+h.shares)} ${esc(h.unit || "")}</span>
+            </div>`).join("")}</div>` : `<p class="muted small">Nothing in the vault yet.</p>`}` : ""}
+        ${!p.show_balance && !p.show_holdings ? `<p class="muted small pub-private">🔒 Balance and holdings are private.</p>` : ""}
+      </article>`;
+  }
+
   // ---------- page bootstrap for signed-in pages ----------
   async function start(render) {
     if (!configured) return showSetupNeeded();
@@ -374,5 +414,5 @@
     }
   }
 
-  window.UI = { db, configured, start, loadPortfolio, refreshNotices, openInvite, push, notifyRecipients, signOut, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
+  window.UI = { db, configured, start, loadPortfolio, refreshNotices, openInvite, push, notifyRecipients, signOut, renderPublicProfile, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
 })();
