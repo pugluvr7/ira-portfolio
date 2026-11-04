@@ -59,7 +59,7 @@
           },
         });
         if (error) throw error;
-        if (data.session) return location.replace("edit.html"); // email confirmation is off
+        if (data.session) return location.replace("profile.html#portfolio"); // email confirmation is off
         say("Check your email to confirm your account, then sign in here.", "success");
       } else {
         const { error } = await db.auth.signInWithPassword({ email, password });

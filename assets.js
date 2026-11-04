@@ -36,7 +36,7 @@
           <div class="empty-emoji" aria-hidden="true">🫙</div>
           <h2>Nothing in the vault yet</h2>
           <p class="muted">Add some holdings and they'll show up here as pictures.</p>
-          <a class="primary-btn" href="edit.html">Add holdings</a>
+          <a class="primary-btn" href="profile.html#portfolio">Add holdings</a>
         </section>`);
       $("class-strip").hidden = true;
       $("vault").closest(".card").hidden = true;

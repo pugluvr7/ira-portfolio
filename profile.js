@@ -1,5 +1,5 @@
 (function () {
-  const { start, db, loadPortfolio, push, classes, colorOf, esc } = window.UI;
+  const { start, db, loadPortfolio, push, signOut, classes, colorOf, esc } = window.UI;
   const $ = (id) => document.getElementById(id);
 
   const say = (el, text, kind = "success") => {
@@ -10,6 +10,19 @@
 
   start(async (P, { user }) => {
     let state = P;
+
+    // ---------- profile header ----------
+    const since = new Date(P.profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const renderHero = (name) => {
+      $("profile-avatar").textContent = (name || "?").slice(0, 1).toUpperCase();
+      $("profile-name").textContent = name;
+    };
+    renderHero(P.holder);
+    $("profile-meta").textContent = `${user.email} · Member since ${since}`;
+    $("signout-text").textContent = `Signed in as ${user.email}. Signing out also turns off notifications on this device.`;
+    $("settings-sign-out").addEventListener("click", signOut);
+    // jump to #portfolio / #settings when arriving from the profile menu
+    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
     const refresh = async () => { state = await loadPortfolio(user.id); renderHoldings(); };
 
     // ---------- account ----------
@@ -31,7 +44,9 @@
       if (error) return say(msg, error.message, "error");
       say(msg, "Saved ✓");
       document.querySelector(".brand-name").textContent = f.account_name.value.trim() || "Roth IRA";
-      document.querySelector(".user-chip").lastChild.textContent = f.display_name.value.trim();
+      document.querySelectorAll(".profile-chip-name, .profile-dropdown-head .person-name").forEach((n) => (n.textContent = f.display_name.value.trim()));
+      document.querySelector("#profile-btn .user-avatar").textContent = f.display_name.value.trim().slice(0, 1).toUpperCase();
+      renderHero(f.display_name.value.trim());
     });
 
     // ---------- targets ----------

@@ -97,7 +97,6 @@
   const PAGES = [
     ["index.html", "Dashboard"],
     ["assets.html", "Asset visualization"],
-    ["edit.html", "Edit portfolio"],
     ["transfers.html", "Transfers"],
     ["friends.html", "Friends"],
   ];
@@ -120,20 +119,46 @@
           ${PAGES.map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ""}>${label}${BADGES[href] ? `<span class="tab-badge" id="${BADGES[href]}" hidden></span>` : ""}</a>`).join("")}
         </div>
         <div class="nav-user">
-          <span class="user-chip" title="Signed in"><span class="user-avatar" aria-hidden="true">${esc((P.holder || "?").slice(0, 1).toUpperCase())}</span>${esc(P.holder)}</span>
           <button id="invite-btn" class="pill-btn invite-pill" type="button">✉️ Invite</button>
-          <button id="sign-out" class="pill-btn" type="button">Sign out</button>
           <button id="theme-toggle" class="pill-btn" type="button" aria-label="Toggle dark mode"></button>
+          <div class="profile-menu">
+            <button id="profile-btn" class="profile-chip${page === "profile.html" ? " is-current" : ""}" type="button"
+                    aria-haspopup="menu" aria-expanded="false" aria-controls="profile-dropdown">
+              <span class="user-avatar" aria-hidden="true">${esc((P.holder || "?").slice(0, 1).toUpperCase())}</span>
+              <span class="profile-chip-name">${esc(P.holder)}</span>
+              <span class="profile-caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="profile-dropdown" id="profile-dropdown" role="menu" hidden>
+              <div class="profile-dropdown-head">
+                <div class="person-name">${esc(P.holder)}</div>
+                <div class="muted small">${esc(P.email || "")}</div>
+              </div>
+              <a role="menuitem" href="profile.html">👤 Profile</a>
+              <a role="menuitem" href="profile.html#portfolio">✏️ Edit portfolio</a>
+              <a role="menuitem" href="profile.html#settings">⚙️ Settings</a>
+              <button role="menuitem" type="button" id="sign-out" class="menu-danger">🚪 Sign out</button>
+            </div>
+          </div>
         </div>
       </div>`;
     $("invite-btn").addEventListener("click", () => openInvite({ from: P.holder }));
-    $("sign-out").addEventListener("click", async () => {
-      // stop this device getting alerts for an account that's no longer signed in here
-      await push.disable().catch(() => {});
-      await db.auth.signOut();
-      location.href = "login.html";
-    });
+    $("sign-out").addEventListener("click", signOut);
+
+    // profile menu: open/close on click, close on outside click, Escape, or picking an item
+    const btn = $("profile-btn"), menu = $("profile-dropdown");
+    const setOpen = (open) => { menu.hidden = !open; btn.setAttribute("aria-expanded", open); };
+    btn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(menu.hidden); });
+    document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target)) setOpen(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { setOpen(false); btn.focus(); } });
+    menu.addEventListener("click", (e) => { if (e.target.closest("a")) setOpen(false); });
     wireThemeToggle();
+  }
+
+  async function signOut() {
+    // stop this device getting alerts for an account that's no longer signed in here
+    await push.disable().catch(() => {});
+    await db.auth.signOut();
+    location.href = "login.html";
   }
 
   // ---------- invite a friend: site-sent email, plus copy link / share ----------
@@ -332,6 +357,7 @@
     }
     try {
       const P = await loadPortfolio(session.user.id);
+      P.email = session.user.email;
       renderNav(P);
       refreshNotices(session.user.id);
       await render(P, { user: session.user });
@@ -348,5 +374,5 @@
     }
   }
 
-  window.UI = { db, configured, start, loadPortfolio, refreshNotices, openInvite, push, notifyRecipients, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
+  window.UI = { db, configured, start, loadPortfolio, refreshNotices, openInvite, push, notifyRecipients, signOut, wireThemeToggle, showTip, hideTip, classes, colorOf, esc };
 })();

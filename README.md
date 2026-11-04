@@ -7,13 +7,13 @@ retirement holdings — stocks, seafood, precious metals, real estate and cash.
 
 - **Dashboard** — balance, gains, contribution progress, value-over-time chart, allocation vs. target, holdings.
 - **Asset visualization** — every holding as pictures: a tile "vault" and a gallery card per asset.
-- **Edit portfolio** — change your account details and target allocation; add, edit and delete holdings,
-  from stocks to live lobsters.
+- **Profile** (top right) — edit your portfolio (account details, target allocation, add/edit/delete holdings)
+  and Settings (notifications, sign out). Holdings can be anything from stocks to live lobsters.
 - **Friends** — add other users by email; they accept or decline. Friends show up in a picker
   when you send a transfer, so you don't have to type their email.
 - **Transfers** — send part of any holding to a friend or to any account by email. They get a badge and banner,
   and the assets only move when they accept. Senders can cancel while it's pending.
-- **Push notifications** — turn them on per device (Edit portfolio → Notifications) to get an alert
+- **Push notifications** — turn them on per device (Profile → Settings → Notifications) to get an alert
   for new transfers and friend requests. On iPhone, add the site to your Home Screen first.
 - **Invite a friend** — the ✉️ Invite button emails a friend an invite straight from the site
   (10 per person per day), or copies/shares the link; it opens straight onto Create account.
@@ -65,7 +65,7 @@ the matching private key is a Supabase secret.
    deploy, and turn **off** "Verify JWT with legacy secret".
 3. **Secrets:** add `VAPID_PRIVATE_KEY` (the private key generated for this site — keep it out of the
    repo) and optionally `VAPID_SUBJECT` = `mailto:you@example.com`.
-4. On a phone or computer, open **Edit portfolio → Notifications → Turn on notifications**, then
+4. On a phone or computer, open **Profile → Settings → Notifications → Turn on notifications**, then
    **Send a test**.
 
 To use your own key pair instead, generate one (`npx web-push generate-vapid-keys`), put the public
@@ -84,7 +84,8 @@ from disk won't work well with login — serve the folder.)
 
 - `index.html` + `app.js` – dashboard
 - `assets.html` + `assets.js` – asset visualization
-- `edit.html` + `edit.js` – edit account, targets and holdings
+- `profile.html` + `profile.js` – profile: edit portfolio (account, targets, holdings) and settings
+- `edit.html` – redirect to the profile page for old links
 - `transfers.html` + `transfers.js` – send, accept, decline and cancel transfers
 - `friends.html` + `friends.js` – add, accept, decline and remove friends
 - `login.html` + `login.js` – sign in / create account
